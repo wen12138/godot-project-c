@@ -1,0 +1,9 @@
+[submodule "cursor-mcps/godot-mcp"]
+	path = cursor-mcps/godot-mcp
+	url = git@github.com:tugcantopaloglu/godot-mcp.git
+[submodule "cursor-plugins/GodotPrompter"]
+	path = cursor-plugins/GodotPrompter
+	url = git@github.com:jame581/GodotPrompter.git
+[submodule "cursor-skills/superpowers"]
+	path = cursor-skills/superpowers
+	url = git@github.com:obra/superpowers.git

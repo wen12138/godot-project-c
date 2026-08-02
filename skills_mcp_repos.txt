@@ -1,0 +1,8 @@
+mcp:
+git@github.com:tugcantopaloglu/godot-mcp.git
+
+plugin:
+git@github.com:jame581/GodotPrompter.git
+
+skill:
+git@github.com:obra/superpowers.git
