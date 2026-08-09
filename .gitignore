@@ -19,3 +19,5 @@ mono_crash.*.json
 
 # Cursor local noise (keep project MCP config)
 .cursor/*.log
+
+.vs/

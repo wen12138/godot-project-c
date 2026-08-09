@@ -1,0 +1,30 @@
+[gd_scene format=3 uid="uid://jx6fhh0sbfcy"]
+
+[ext_resource type="Script" uid="uid://l2jgda0fdu7u" path="res://scripts/Actor.cs" id="1_duu5m"]
+[ext_resource type="Texture2D" uid="uid://c6erh3dib8raw" path="res://sprites/Enemy.png" id="2_duu5m"]
+[ext_resource type="Script" uid="uid://b3gamf6set2xf" path="res://scripts/TransformComponent.cs" id="3_oovrp"]
+[ext_resource type="Texture2D" uid="uid://1su0dahvuixp" path="res://sprites/shadow.png" id="4_hgomy"]
+[ext_resource type="Script" uid="uid://dhqsg4cc7u05j" path="res://scripts/MovementComponent.cs" id="4_hxbby"]
+[ext_resource type="Texture2D" uid="uid://86mipi2fra0q" path="res://sprites/forward_arrow.png" id="6_oovrp"]
+
+[node name="Enemy" type="Node2D" unique_id=1297045618]
+script = ExtResource("1_duu5m")
+
+[node name="TransformComponent" type="Node" parent="." unique_id=1863022047]
+script = ExtResource("3_oovrp")
+
+[node name="MovementComponent" type="Node" parent="." unique_id=1629148371]
+script = ExtResource("4_hxbby")
+
+[node name="RenderPrivot" type="Node2D" parent="." unique_id=1795713165]
+
+[node name="Shadow" type="Sprite2D" parent="RenderPrivot" unique_id=113315737]
+texture = ExtResource("4_hgomy")
+
+[node name="Render" type="Sprite2D" parent="RenderPrivot" unique_id=2131274872]
+position = Vector2(0, -57.5)
+texture = ExtResource("2_duu5m")
+
+[node name="ForwardArrow" type="Sprite2D" parent="RenderPrivot" unique_id=1892403766]
+position = Vector2(21, 0)
+texture = ExtResource("6_oovrp")

@@ -11,12 +11,19 @@ config_version=5
 [application]
 
 config/name="ProjectC"
-config/features=PackedStringArray("4.6", "Forward Plus")
+run/main_scene="uid://ddusllkul0qg0"
+config/features=PackedStringArray("4.6", "C#", "Forward Plus")
 config/icon="res://icon.svg"
 
 [autoload]
 
 McpInteractionServer="*res://addons/godot_mcp/mcp_interaction_server.gd"
+
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/size/resizable=false
 
 [dotnet]
 

@@ -1,3 +1,30 @@
 [gd_scene format=3 uid="uid://ddusllkul0qg0"]
 
+[ext_resource type="Texture2D" uid="uid://0f27sexaiaoq" path="res://sprites/Back.png" id="1_h2yge"]
+[ext_resource type="Texture2D" uid="uid://befwjls83mywp" path="res://sprites/Mid.png" id="2_1bvp3"]
+[ext_resource type="Texture2D" uid="uid://crpo1pbyoqkwe" path="res://sprites/Fore.png" id="3_lquwl"]
+[ext_resource type="PackedScene" uid="uid://d0c82o02o7ci3" path="res://prefabs/Player.tscn" id="4_1bvp3"]
+
 [node name="Main" type="Node2D" unique_id=157214660]
+
+[node name="Map" type="Node2D" parent="." unique_id=1110567484]
+
+[node name="Background" type="Sprite2D" parent="Map" unique_id=1550605923]
+y_sort_enabled = true
+position = Vector2(640, 150)
+texture = ExtResource("1_h2yge")
+
+[node name="Mid" type="Sprite2D" parent="Map" unique_id=536337679]
+y_sort_enabled = true
+position = Vector2(640, 510)
+texture = ExtResource("2_1bvp3")
+
+[node name="Foreground" type="Sprite2D" parent="Map" unique_id=1792596489]
+y_sort_enabled = true
+position = Vector2(640, 660)
+texture = ExtResource("3_lquwl")
+
+[node name="Actors" type="Node2D" parent="." unique_id=1876159038]
+
+[node name="Player" parent="Actors" unique_id=1297045618 instance=ExtResource("4_1bvp3")]
+position = Vector2(95, 431)
