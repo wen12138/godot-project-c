@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="ActorDefinition" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/ActorDefinition.cs" id="1_def"]
+[ext_resource type="Resource" path="res://data/actors/movement/enemy_default_move.tres" id="2_move"]
+
+[resource]
+script = ExtResource("1_def")
+Id = "enemy_default"
+Movement = ExtResource("2_move")

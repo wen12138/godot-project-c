@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="ActorMovementConfig" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/ActorMovementConfig.cs" id="1_move"]
+
+[resource]
+script = ExtResource("1_move")
+BaseMoveSpeed = 200.0
+BaseJumpForce = 400.0
+BaseAerialMoveSpeedScale = 0.7
