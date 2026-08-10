@@ -6,6 +6,7 @@
 [ext_resource type="Texture2D" uid="uid://1su0dahvuixp" path="res://sprites/shadow.png" id="4_1nynx"]
 [ext_resource type="Script" uid="uid://dhqsg4cc7u05j" path="res://scripts/MovementComponent.cs" id="4_64pgi"]
 [ext_resource type="Texture2D" uid="uid://86mipi2fra0q" path="res://sprites/forward_arrow.png" id="6_64pgi"]
+[ext_resource type="Script" uid="uid://h4k2254ksqs3" path="res://scripts/PlayerInputComponent.cs" id="7_input"]
 
 [node name="Player" type="Node2D" unique_id=1297045618]
 script = ExtResource("1_p3xyx")
@@ -16,15 +17,18 @@ script = ExtResource("3_1nynx")
 [node name="MovementComponent" type="Node" parent="." unique_id=1629148371]
 script = ExtResource("4_64pgi")
 
+[node name="PlayerInputComponent" type="Node" parent="."]
+script = ExtResource("7_input")
+
 [node name="RenderPrivot" type="Node2D" parent="." unique_id=2008766164]
 
 [node name="Shadow" type="Sprite2D" parent="RenderPrivot" unique_id=1583956380]
 texture = ExtResource("4_1nynx")
 
-[node name="Render" type="Sprite2D" parent="RenderPrivot" unique_id=2131274872]
-position = Vector2(0, -75)
-texture = ExtResource("2_wuy1y")
-
 [node name="ForwardArrow" type="Sprite2D" parent="RenderPrivot" unique_id=482277145]
 position = Vector2(21, 0)
 texture = ExtResource("6_64pgi")
+
+[node name="Render" type="Sprite2D" parent="RenderPrivot" unique_id=2131274872]
+position = Vector2(0, -75)
+texture = ExtResource("2_wuy1y")
