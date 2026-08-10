@@ -22,15 +22,15 @@ script = ExtResource("4_64pgi")
 [node name="PlayerInputComponent" type="Node" parent="."]
 script = ExtResource("7_input")
 
-[node name="RenderPrivot" type="Node2D" parent="." unique_id=2008766164]
-
-[node name="Shadow" type="Sprite2D" parent="RenderPrivot" unique_id=1583956380]
+[node name="Shadow" type="Sprite2D" parent="." unique_id=1583956380]
 texture = ExtResource("4_1nynx")
 
-[node name="ForwardArrow" type="Sprite2D" parent="RenderPrivot" unique_id=482277145]
+[node name="Privot" type="Node2D" parent="." unique_id=2008766164]
+
+[node name="ForwardArrow" type="Sprite2D" parent="Privot" unique_id=482277145]
 position = Vector2(21, 0)
 texture = ExtResource("6_64pgi")
 
-[node name="Render" type="Sprite2D" parent="RenderPrivot" unique_id=2131274872]
+[node name="Render" type="Sprite2D" parent="Privot" unique_id=2131274872]
 position = Vector2(0, -75)
 texture = ExtResource("2_wuy1y")
