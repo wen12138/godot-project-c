@@ -1,14 +1,35 @@
 using Godot;
-using System;
 
 public partial class MovementComponent : Node
 {
-	// Called when the node enters the scene tree for the first time.
+	private ActorMovementConfig m_MovementConfig;
+
+	public ActorMovementConfig MovementConfig => m_MovementConfig;
+
 	public override void _Ready()
 	{
+		var actor = GetParentOrNull<Actor>();
+		if (actor == null)
+		{
+			GD.PushError($"{GetPath()}: parent is not Actor");
+			return;
+		}
+
+		if (actor.Definition == null)
+		{
+			GD.PushError($"{GetPath()}: Actor.Definition is null");
+			return;
+		}
+
+		if (actor.Definition.Movement == null)
+		{
+			GD.PushError($"{GetPath()}: Actor.Definition.Movement is null (Id={actor.Definition.Id})");
+			return;
+		}
+
+		m_MovementConfig = actor.Definition.Movement;
 	}
 
-	// Called every frame. 'delta' is the elapsed time since the previous frame.
 	public override void _Process(double delta)
 	{
 	}

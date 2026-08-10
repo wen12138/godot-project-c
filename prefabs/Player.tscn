@@ -7,9 +7,11 @@
 [ext_resource type="Script" uid="uid://dhqsg4cc7u05j" path="res://scripts/MovementComponent.cs" id="4_64pgi"]
 [ext_resource type="Texture2D" uid="uid://86mipi2fra0q" path="res://sprites/forward_arrow.png" id="6_64pgi"]
 [ext_resource type="Script" uid="uid://h4k2254ksqs3" path="res://scripts/PlayerInputComponent.cs" id="7_input"]
+[ext_resource type="Resource" path="res://data/actors/player_default.tres" id="8_actor_def"]
 
 [node name="Player" type="Node2D" unique_id=1297045618]
 script = ExtResource("1_p3xyx")
+Definition = ExtResource("8_actor_def")
 
 [node name="TransformComponent" type="Node" parent="." unique_id=1863022047]
 script = ExtResource("3_1nynx")

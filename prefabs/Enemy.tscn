@@ -6,9 +6,11 @@
 [ext_resource type="Texture2D" uid="uid://1su0dahvuixp" path="res://sprites/shadow.png" id="4_hgomy"]
 [ext_resource type="Script" uid="uid://dhqsg4cc7u05j" path="res://scripts/MovementComponent.cs" id="4_hxbby"]
 [ext_resource type="Texture2D" uid="uid://86mipi2fra0q" path="res://sprites/forward_arrow.png" id="6_oovrp"]
+[ext_resource type="Resource" path="res://data/actors/enemy_default.tres" id="8_actor_def"]
 
 [node name="Enemy" type="Node2D" unique_id=1297045618]
 script = ExtResource("1_duu5m")
+Definition = ExtResource("8_actor_def")
 
 [node name="TransformComponent" type="Node" parent="." unique_id=1863022047]
 script = ExtResource("3_oovrp")
