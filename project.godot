@@ -18,6 +18,7 @@ config/icon="res://icon.svg"
 [autoload]
 
 McpInteractionServer="*res://addons/godot_mcp/mcp_interaction_server.gd"
+SaveService="*res://scripts/data/SaveService.cs"
 
 [display]
 
