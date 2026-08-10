@@ -6,17 +6,18 @@
 
 ## 目标
 
-为 Beat ’em up 伪 3D 走位建立统一的「逻辑坐标 ↔ 世界坐标」映射：用场景中的 `MapOrigin` 标定逻辑 `(0, 0)`，以逻辑坐标为运行时权威，正确初始化已摆在场景中的 Actor，并为后续运行时生成提供同一套 API。同时明确：`Actor` 根节点只表示贴地走位；`VirtualZ`（跳跃高度）只作用在离地枢轴 `Privot` 上。
+为 Beat ’em up 伪 3D 走位建立统一的「逻辑坐标 ↔ 世界坐标」映射：用场景中的 `MapOrigin` 标定逻辑 `(0, 0)`。进场（编辑器摆位或运行时生成）以世界 `Node2D` 位置为直观入口，再反算逻辑坐标；进场之后以逻辑坐标为运行时权威驱动位移。同时明确：`Actor` 根节点只表示贴地走位；`VirtualZ`（跳跃高度）只作用在离地枢轴 `Privot` 上。
 
 ## 约束
 
-- 运行时权威始终是逻辑坐标（`LogicX` / `LogicDepth` / `VirtualZ`）；`Node2D` 位置是投影结果
+- **进场**：以世界 `Position` / `GlobalPosition` 为入口（可选额外高度）；逻辑坐标由世界位姿反算，不要求 Spawner 传逻辑 XY
+- **进场之后**：权威是逻辑坐标（`LogicX` / `LogicDepth` / `VirtualZ`）；根与 `Privot` 的 `Node2D` 位置是投影结果
 - 投影常量只定义一处（`MapCoordinates`），`TransformComponent` 不得再各自维护一套
 - Actor 预制体不写死 `../../Map/MapOrigin` 路径；通过 Autoload `MapContext` 取当前关卡原点
 - 换算使用 `MapOrigin.GlobalPosition`，以便整图平移后仍正确
-- 反算世界→逻辑时约定贴地（`VirtualZ = 0`）；高度与深度在屏幕 Y 上混叠，不尝试从单一屏幕 Y 反解高度
+- 从世界位置反算地面逻辑时 `VirtualZ` 不参与（高度与深度在屏幕 Y 上混叠，不从单一屏幕 Y 反解高度）；非贴地生成用**额外高度参数**写入 `VirtualZ`
 - 保持项目既有节点名拼写 `Privot`（由原 `RenderPrivot` 更名），本轮不改名为英文 `Pivot`
-- 本轮不做可行走区域钳制、HurtBox、真实移动物理、存档读写逻辑坐标
+- 本轮不做可行走区域钳制、HurtBox、真实移动物理、存档读写逻辑坐标、完整 Spawner 系统（只定进场契约）
 
 ## 架构
 
@@ -120,34 +121,56 @@ Actor (Node2D)
 
 ## 初始化 / 生成 / 每帧写回
 
-### 编辑器已摆好的 Actor
+### 统一进场路径（场景摆位 = 运行时生成）
+
+编辑器摆好的 Actor 与运行时 `Instantiate` 共用同一条初始化：
 
 1. `MapOrigin` 进入树 → 注册到 `MapContext`
-2. `TransformComponent._Ready`：解析父 `Actor` 与子级 `Privot`（路径 `Privot`）；缺则 `PushError`（根仍可更新，不写离地偏移）
-3. **固定用 `CallDeferred(nameof(InitializeFromWorldPose))` 做反算初始化**，确保同帧内 `MapOrigin` 已完成注册
-4. `InitializeFromWorldPose`：若 `MapContext.HasOrigin`，用 `Actor.GlobalPosition` 做 `WorldToLogicGround`，`VirtualZ = 0`，再 `UpdateVisualPosition` 写回（数值应与摆位一致）；若无 Origin：`PushError`（含节点路径），跳过写位置，不静默当作 `(0,0)`
+2. 进场方保证 `Actor` 的世界位置已是期望的**地面落点**（编辑器 `position`，或生成时赋值 `GlobalPosition`）
+3. `TransformComponent._Ready`：解析父 `Actor` 与子级 `Privot`（路径 `Privot`）；缺则 `PushError`（根仍可更新，不写离地偏移）
+4. **固定用 `CallDeferred(nameof(InitializeFromWorldPose))` 做反算**，确保同帧内 `MapOrigin` 已注册
+5. `InitializeFromWorldPose(float initialVirtualZ = 0)`：
+   - 若无 Origin：`PushError`（含节点路径），跳过写位置，不静默当作 `(0,0)`
+   - 若有 Origin：用 `Actor.GlobalPosition` 做 `WorldToLogicGround` → `LogicX` / `LogicDepth`；写入 `VirtualZ = initialVirtualZ`（默认 `0` 即贴地）；再 `UpdateVisualPosition`
+
+场景内摆位：走默认 `initialVirtualZ = 0`，写回后根位置应与摆位一致。
+
+### 运行时生成契约（后续 Spawner，本轮不实现 Spawner）
+
+```text
+参数：worldPosition（Node2D 地面世界坐标，必填）
+      initialVirtualZ（可选，默认 0 = 贴地）
+
+流程：
+  1. Instantiate Actor
+  2. AddChild 到场景树（如 Actors）
+  3. actor.GlobalPosition = worldPosition   // 直观的 Transform 位置
+  4. 若 initialVirtualZ != 0：在初始化前/中传入该高度
+     （实现可选：TransformComponent 提供 PendingInitialVirtualZ，
+      或对外 InitializeFromWorldPose(initialVirtualZ)；
+      默认路径不传则贴地）
+  5. TransformComponent 的 deferred InitializeFromWorldPose
+     从 GlobalPosition 反算 LogicX/LogicDepth，并套用 initialVirtualZ
+```
+
+约定：
+
+- **生成默认贴地**；只有需要空中刷出时才额外传高度
+- **不把逻辑 XY 作为生成必填参数**；若日后数据侧只有逻辑格，先 `LogicToWorld(origin, x, depth, virtualZ: 0)` 得到 `worldPosition`，再走上述流程
+- `MapCoordinates.LogicToWorld` 仍保留，供工具/数据转换，不作为 Spawner 主 API
 
 ### `TransformComponent` 对外位姿 API（本轮）
 
 | API | 含义 |
 |-----|------|
-| `SetLogicX` / `SetLogicDepth` / `SetVirtualZ` | 分项写入并刷新视觉 |
-| `SetLogicPose(float logicX, float logicDepth, float virtualZ = 0)` | 聚合写入，供生成器一次设定 |
+| `InitializeFromWorldPose(float initialVirtualZ = 0)` | 进场：世界地面位 → 逻辑；可选初始高度 |
+| `SetLogicX` / `SetLogicDepth` / `SetVirtualZ` | 进场之后分项写入并刷新视觉（移动/跳跃用） |
 
-### 运行时生成（后续 Spawner，本轮只定契约）
-
-```text
-传入 logicX, logicDepth, virtualZ（默认 0）
-  → Instantiate 并 AddChild
-  → TransformComponent.SetLogicPose(...)
-  → 内部 UpdateVisualPosition
-```
-
-禁止在生成后再走「编辑器反算」覆盖逻辑值，除非输入本身是屏幕点：先 `WorldToLogicGround`，再 `SetLogicPose`。
+本轮不要求 `SetLogicPose` 生成入口；若实现中为方便提供聚合 setter，仅供运行时改逻辑，不替代世界 Position 进场。
 
 ### 每帧 / 移动后
 
-- `MovementComponent` 等只改逻辑（`SetLogicX` / `SetLogicDepth` / `SetVirtualZ` 或聚合 `SetLogicPose`）
+- `MovementComponent` 等只改逻辑（`SetLogicX` / `SetLogicDepth` / `SetVirtualZ`）
 - `TransformComponent.UpdateVisualPosition`：
   - `Actor.GlobalPosition = LogicToWorld(origin, LogicX, LogicDepth, virtualZ: 0)`
   - `Privot.Position = VirtualZScreenOffset(VirtualZ)`（不覆盖 `Render` 的美术锚点）
@@ -195,7 +218,8 @@ Actor (Node2D)
 ## 完成标准
 
 1. 关卡存在 `MapOrigin`，进出树自动注册/清理到 `MapContext`
-2. 场景内已摆 Player：启动后由根 `GlobalPosition` 反算逻辑坐标；根位置不因 `VirtualZ` 漂移
-3. `SetVirtualZ` 只移动 `Privot`；`Shadow` 与 `Actor` 根保持贴地
-4. `DepthToScreenY` / `HeightToScreenY` 仅存在于 `MapCoordinates`
-5. 工程 C# 编译通过；不要求自动化测试
+2. 场景内已摆 Player：启动后由根 `GlobalPosition` 反算逻辑坐标（默认贴地）；根位置不因 `VirtualZ` 漂移
+3. 进场契约文档化：生成用世界 Position + 可选高度；与场景摆位共用 `InitializeFromWorldPose`
+4. `SetVirtualZ` 只移动 `Privot`；`Shadow` 与 `Actor` 根保持贴地
+5. `DepthToScreenY` / `HeightToScreenY` 仅存在于 `MapCoordinates`
+6. 工程 C# 编译通过；不要求自动化测试；不要求本轮实现 Spawner
