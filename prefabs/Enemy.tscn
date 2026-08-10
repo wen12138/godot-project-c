@@ -21,10 +21,10 @@ script = ExtResource("4_hxbby")
 [node name="Shadow" type="Sprite2D" parent="RenderPrivot" unique_id=113315737]
 texture = ExtResource("4_hgomy")
 
-[node name="Render" type="Sprite2D" parent="RenderPrivot" unique_id=2131274872]
-position = Vector2(0, -57.5)
-texture = ExtResource("2_duu5m")
-
 [node name="ForwardArrow" type="Sprite2D" parent="RenderPrivot" unique_id=1892403766]
 position = Vector2(21, 0)
 texture = ExtResource("6_oovrp")
+
+[node name="Render" type="Sprite2D" parent="RenderPrivot" unique_id=2131274872]
+position = Vector2(0, -57.5)
+texture = ExtResource("2_duu5m")
