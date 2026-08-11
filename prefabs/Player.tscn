@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://d0c82o02o7ci3"]
 
-[ext_resource type="Script" uid="uid://l2jgda0fdu7u" path="res://scripts/Actor.cs" id="1_p3xyx"]
+[ext_resource type="Script" uid="uid://ddk7lans1eohn" path="res://scripts/Player.cs" id="1_p3xyx"]
 [ext_resource type="Texture2D" uid="uid://cr3y2v2ur2ny3" path="res://sprites/Player.png" id="2_wuy1y"]
 [ext_resource type="Script" uid="uid://b3gamf6set2xf" path="res://scripts/TransformComponent.cs" id="3_1nynx"]
 [ext_resource type="Texture2D" uid="uid://1su0dahvuixp" path="res://sprites/shadow.png" id="4_1nynx"]
@@ -19,7 +19,7 @@ script = ExtResource("3_1nynx")
 [node name="MovementComponent" type="Node" parent="." unique_id=1629148371]
 script = ExtResource("4_64pgi")
 
-[node name="PlayerInputComponent" type="Node" parent="."]
+[node name="PlayerInputComponent" type="Node" parent="." unique_id=1731902976]
 script = ExtResource("7_input")
 
 [node name="Shadow" type="Sprite2D" parent="." unique_id=1583956380]

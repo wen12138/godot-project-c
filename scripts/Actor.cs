@@ -10,11 +10,21 @@ public partial class Actor : Node2D
 
 	public override void _Ready()
 	{
-		m_TransformComponent = GetNode<TransformComponent>("TransformComponent");
-		m_MovementComponent = GetNode<MovementComponent>("MovementComponent");
+		m_TransformComponent = GetNodeOrNull<TransformComponent>("TransformComponent");
+		if (m_TransformComponent == null)
+		{
+			GD.PushError($"{GetPath()}: missing child TransformComponent");
+		}
+
+		m_MovementComponent = GetNodeOrNull<MovementComponent>("MovementComponent");
+		if (m_MovementComponent == null)
+		{
+			GD.PushError($"{GetPath()}: missing child MovementComponent");
+		}
 	}
 
 	public override void _PhysicsProcess(double delta)
 	{
+		m_MovementComponent?.PhysicsTick(delta);
 	}
 }
