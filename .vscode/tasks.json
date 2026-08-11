@@ -1,0 +1,61 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "build",
+        "${workspaceFolder}/ProjectC.sln",
+        "-c",
+        "Debug"
+      ],
+      "problemMatcher": "$msCompile",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "silent",
+        "panel": "shared",
+        "focus": false
+      }
+    },
+    {
+      "label": "run-godot",
+      "type": "process",
+      "command": "d:\\Godot_v4.6.2-stable_mono_win64\\Godot_v4.6.2-stable_mono_win64.exe",
+      "args": [
+        "--path",
+        "${workspaceFolder}"
+      ],
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "godot",
+        "pattern": {
+          "regexp": "^$"
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": ".",
+          "endsPattern": "Godot Engine v"
+        }
+      },
+      "presentation": {
+        "reveal": "silent",
+        "panel": "shared",
+        "focus": false
+      }
+    },
+    {
+      "label": "build-and-run-godot",
+      "dependsOrder": "sequence",
+      "dependsOn": [
+        "build",
+        "run-godot"
+      ],
+      "problemMatcher": []
+    }
+  ]
+}

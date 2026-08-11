@@ -4,14 +4,13 @@
 [ext_resource type="Texture2D" uid="uid://befwjls83mywp" path="res://sprites/Mid.png" id="2_1bvp3"]
 [ext_resource type="Texture2D" uid="uid://crpo1pbyoqkwe" path="res://sprites/Fore.png" id="3_lquwl"]
 [ext_resource type="PackedScene" uid="uid://d0c82o02o7ci3" path="res://prefabs/Player.tscn" id="4_1bvp3"]
-[ext_resource type="Script" path="res://scripts/MapOrigin.cs" id="5_mapori"]
+[ext_resource type="Script" uid="uid://b2b5f26b21kjl" path="res://scripts/MapOrigin.cs" id="5_mapori"]
 
 [node name="Main" type="Node2D" unique_id=157214660]
 
 [node name="Map" type="Node2D" parent="." unique_id=1110567484]
 
-[node name="MapOrigin" type="Marker2D" parent="Map"]
-position = Vector2(0, 0)
+[node name="MapOrigin" type="Marker2D" parent="Map" unique_id=1977712037]
 script = ExtResource("5_mapori")
 
 [node name="Background" type="Sprite2D" parent="Map" unique_id=1550605923]
