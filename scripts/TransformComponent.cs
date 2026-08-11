@@ -120,6 +120,11 @@ public partial class TransformComponent : Node
 		return m_VisualY;
 	}
 
+	public virtual float GetLogicX()
+	{
+		return m_LogicX;
+	}
+
 	public virtual float GetLogicDepth()
 	{
 		return m_LogicDepth;
