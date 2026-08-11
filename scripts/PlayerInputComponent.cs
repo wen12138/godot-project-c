@@ -13,7 +13,7 @@ public partial class PlayerInputComponent : Node
 		}
 	}
 
-	public override void _PhysicsProcess(double delta)
+	public void PhysicsTick(double delta)
 	{
 		if (m_Movement == null)
 		{
