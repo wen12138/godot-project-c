@@ -5,6 +5,7 @@ public partial class MovementComponent : Node
 	private ActorMovementConfig m_MovementConfig;
 	private TransformComponent m_Transform;
 	private Vector2 m_MoveInput = Vector2.Zero;
+	private float m_VerticalVelocity;
 
 	public ActorMovementConfig MovementConfig => m_MovementConfig;
 
@@ -45,6 +46,17 @@ public partial class MovementComponent : Node
 
 	public void Jump()
 	{
+		if (m_MovementConfig == null || m_Transform == null)
+		{
+			return;
+		}
+
+		if (!IsGrounded(m_Transform.GetVirtualZ()))
+		{
+			return;
+		}
+
+		m_VerticalVelocity = m_MovementConfig.BaseJumpForce;
 	}
 
 	public void PhysicsTick(double delta)
@@ -54,16 +66,46 @@ public partial class MovementComponent : Node
 			return;
 		}
 
+		var dt = (float)delta;
+		var virtualZ = m_Transform.GetVirtualZ();
+
+		if (!IsGrounded(virtualZ))
+		{
+			m_VerticalVelocity -= m_MovementConfig.BaseGravity * dt;
+			virtualZ += m_VerticalVelocity * dt;
+		}
+
+		if (virtualZ <= 0f)
+		{
+			virtualZ = 0f;
+			m_VerticalVelocity = 0f;
+		}
+
+		if (!Mathf.IsEqualApprox(virtualZ, m_Transform.GetVirtualZ()))
+		{
+			m_Transform.SetVirtualZ(virtualZ);
+		}
+
+		var grounded = IsGrounded(virtualZ);
 		if (m_MoveInput == Vector2.Zero)
 		{
 			return;
 		}
 
-		var dt = (float)delta;
 		var speed = m_MovementConfig.BaseMoveSpeed;
+		if (!grounded)
+		{
+			speed *= m_MovementConfig.BaseAerialMoveSpeedScale;
+		}
+
 		var newX = m_Transform.GetLogicX() + m_MoveInput.X * speed * dt;
 		var newDepth = m_Transform.GetLogicDepth() + m_MoveInput.Y * speed * dt;
 		m_Transform.SetLogicX(newX);
 		m_Transform.SetLogicDepth(newDepth);
+	}
+
+	private bool IsGrounded(float virtualZ)
+	{
+		return virtualZ <= 0f && m_VerticalVelocity <= 0f;
 	}
 }
