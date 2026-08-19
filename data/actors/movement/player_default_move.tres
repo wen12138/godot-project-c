@@ -7,3 +7,4 @@ script = ExtResource("1_move")
 BaseMoveSpeed = 200.0
 BaseJumpForce = 400.0
 BaseAerialMoveSpeedScale = 0.7
+BaseGravity = 980.0

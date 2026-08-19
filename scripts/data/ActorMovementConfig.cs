@@ -11,4 +11,7 @@ public partial class ActorMovementConfig : Resource
 
 	[Export]
 	public float BaseAerialMoveSpeedScale { get; set; } = 0.7f;
+
+	[Export]
+	public float BaseGravity { get; set; } = 980f;
 }
