@@ -129,4 +129,9 @@ public partial class TransformComponent : Node
 	{
 		return m_LogicDepth;
 	}
+
+	public virtual float GetVirtualZ()
+	{
+		return m_VirtualZ;
+	}
 }
