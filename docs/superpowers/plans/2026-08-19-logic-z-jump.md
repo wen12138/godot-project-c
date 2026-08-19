@@ -45,7 +45,7 @@
 - Consumes: 无
 - Produces: `public float BaseGravity { get; set; }`（`[Export]`，默认 `980f`）
 
-- [ ] **Step 1: 在 `ActorMovementConfig` 增加 `BaseGravity`**
+- [x] **Step 1: 在 `ActorMovementConfig` 增加 `BaseGravity`**
 
 将 `scripts/data/ActorMovementConfig.cs` 改为：
 
@@ -69,7 +69,7 @@ public partial class ActorMovementConfig : Resource
 }
 ```
 
-- [ ] **Step 2: 更新两个 `.tres`**
+- [x] **Step 2: 更新两个 `.tres`**
 
 `data/actors/movement/player_default_move.tres`：
 
@@ -101,12 +101,12 @@ BaseAerialMoveSpeedScale = 0.6
 BaseGravity = 980.0
 ```
 
-- [ ] **Step 3: 编译确认**
+- [x] **Step 3: 编译确认**
 
 Run: `dotnet build ProjectC.csproj`  
 Expected: 成功（或仅有与本次无关的既有警告）
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add scripts/data/ActorMovementConfig.cs data/actors/movement/player_default_move.tres data/actors/movement/enemy_default_move.tres
@@ -124,7 +124,7 @@ git commit -m "ActorMovementConfig：新增 BaseGravity 并写入默认移动资
 - Consumes: 既有 `m_VirtualZ`、`GetLogicDepth()`
 - Produces: `public virtual float GetVirtualZ()`
 
-- [ ] **Step 1: 在 `GetLogicDepth` 旁增加对称读取**
+- [x] **Step 1: 在 `GetLogicDepth` 旁增加对称读取**
 
 在 `scripts/TransformComponent.cs` 的 `GetLogicDepth` 之后加入：
 
@@ -154,12 +154,12 @@ public virtual float GetVirtualZ()
 }
 ```
 
-- [ ] **Step 2: 编译确认**
+- [x] **Step 2: 编译确认**
 
 Run: `dotnet build ProjectC.csproj`  
 Expected: 成功
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add scripts/TransformComponent.cs
@@ -183,7 +183,7 @@ git commit -m "TransformComponent：新增 GetVirtualZ 对称读取。"
   - `void PhysicsTick(double delta)` — 重力、落地、空中/贴地水平积分
   - 运行时字段 `m_VerticalVelocity`
 
-- [ ] **Step 1: 替换 `MovementComponent.cs` 为完整实现**
+- [x] **Step 1: 替换 `MovementComponent.cs` 为完整实现**
 
 ```csharp
 using Godot;
@@ -306,7 +306,7 @@ public partial class MovementComponent : Node
 - 仅当 `VirtualZ` 相对 Transform 当前值有变化时才 `SetVirtualZ`，避免贴地静止帧无意义刷新
 - 水平仍松手立刻停；空中用 `BaseAerialMoveSpeedScale`
 
-- [ ] **Step 2: 编译确认**
+- [x] **Step 2: 编译确认**
 
 Run: `dotnet build ProjectC.csproj`  
 Expected: 成功
@@ -320,7 +320,7 @@ Expected: 成功
 3. 空中按方向键：移速明显慢于地面（约 ×0.7）；松手立刻停
 4. 仅走位不跳：行为与改前贴地四向一致
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add scripts/MovementComponent.cs
