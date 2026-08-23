@@ -1,5 +1,11 @@
 using Godot;
 
+public enum ActorFacing
+{
+	Right,
+	Left
+}
+
 public partial class TransformComponent : Node
 {
 	protected float m_VisualX;
@@ -7,10 +13,16 @@ public partial class TransformComponent : Node
 	protected float m_LogicX;
 	protected float m_LogicDepth;
 	protected float m_VirtualZ;
+	protected ActorFacing m_Facing = ActorFacing.Right;
 
 	private Actor m_Actor;
 	private Node2D m_Privot;
 	private bool m_HasPrivot;
+
+	/// <summary>
+	/// 为 true 时，水平移动输入会把逻辑朝向转到移动方向；为 false 时锁定朝向。
+	/// </summary>
+	public bool FaceMoveDirection { get; set; } = true;
 
 	/// <summary>
 	/// 进场前可设：空中刷出的初始高度。默认 0（贴地）。
@@ -34,6 +46,7 @@ public partial class TransformComponent : Node
 			GD.PushError($"{GetPath()}: missing sibling/child path Actor/Privot");
 		}
 
+		UpdateVisualFacing();
 		CallDeferred(MethodName.InitializeFromWorldPoseDeferred);
 	}
 
@@ -85,6 +98,39 @@ public partial class TransformComponent : Node
 		UpdateVisualPosition();
 	}
 
+	public virtual ActorFacing GetFacing()
+	{
+		return m_Facing;
+	}
+
+	public virtual void SetFacing(ActorFacing facing)
+	{
+		if (m_Facing == facing)
+		{
+			return;
+		}
+
+		m_Facing = facing;
+		UpdateVisualFacing();
+	}
+
+	public virtual void ApplyFacingFromMoveInput(Vector2 input)
+	{
+		if (!FaceMoveDirection)
+		{
+			return;
+		}
+
+		if (input.X > 0f)
+		{
+			SetFacing(ActorFacing.Right);
+		}
+		else if (input.X < 0f)
+		{
+			SetFacing(ActorFacing.Left);
+		}
+	}
+
 	protected virtual void UpdateVisualPosition()
 	{
 		if (m_Actor == null)
@@ -107,7 +153,20 @@ public partial class TransformComponent : Node
 		if (m_HasPrivot)
 		{
 			m_Privot.Position = MapCoordinates.VirtualZScreenOffset(m_VirtualZ);
+			UpdateVisualFacing();
 		}
+	}
+
+	protected virtual void UpdateVisualFacing()
+	{
+		if (!m_HasPrivot)
+		{
+			return;
+		}
+
+		var scale = m_Privot.Scale;
+		scale.X = m_Facing == ActorFacing.Right ? 1f : -1f;
+		m_Privot.Scale = scale;
 	}
 
 	public virtual float GetVisualX()

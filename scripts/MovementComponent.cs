@@ -92,6 +92,8 @@ public partial class MovementComponent : Node
 			return;
 		}
 
+		m_Transform.ApplyFacingFromMoveInput(m_MoveInput);
+
 		var speed = m_MovementConfig.BaseMoveSpeed;
 		if (!grounded)
 		{
