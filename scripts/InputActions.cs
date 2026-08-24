@@ -7,6 +7,7 @@ public static class InputActions
 	public const string MoveLeft = "move_left";
 	public const string MoveRight = "move_right";
 	public const string Jump = "jump";
+	public const string Attack = "attack";
 
 	public static Vector2 GetMoveVector()
 	{
@@ -16,5 +17,10 @@ public static class InputActions
 	public static bool IsJumpJustPressed()
 	{
 		return Input.IsActionJustPressed(Jump);
+	}
+
+	public static bool IsAttackJustPressed()
+	{
+		return Input.IsActionJustPressed(Attack);
 	}
 }

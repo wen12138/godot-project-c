@@ -8,6 +8,10 @@
 [ext_resource type="Texture2D" uid="uid://86mipi2fra0q" path="res://sprites/forward_arrow.png" id="6_64pgi"]
 [ext_resource type="Script" uid="uid://h4k2254ksqs3" path="res://scripts/PlayerInputComponent.cs" id="7_input"]
 [ext_resource type="Resource" path="res://data/actors/player_default.tres" id="8_actor_def"]
+[ext_resource type="Script" path="res://scripts/HurtboxComponent.cs" id="9_hurt"]
+[ext_resource type="Script" path="res://scripts/HitboxComponent.cs" id="10_hit"]
+[ext_resource type="Script" path="res://scripts/CombatComponent.cs" id="11_cbt"]
+[ext_resource type="Resource" path="res://data/actors/attacks/player_melee_default.tres" id="12_atk"]
 
 [node name="Player" type="Node2D" unique_id=1297045618]
 script = ExtResource("1_p3xyx")
@@ -18,6 +22,22 @@ script = ExtResource("3_1nynx")
 
 [node name="MovementComponent" type="Node" parent="." unique_id=1629148371]
 script = ExtResource("4_64pgi")
+
+[node name="HurtboxComponent" type="Node2D" parent="."]
+script = ExtResource("9_hurt")
+Team = 0
+Offset = Vector3(0, 0, 36)
+Size = Vector3(36, 24, 72)
+DebugDrawEnabled = true
+
+[node name="HitboxComponent" type="Node2D" parent="."]
+script = ExtResource("10_hit")
+Team = 0
+DebugDrawEnabled = true
+
+[node name="CombatComponent" type="Node" parent="."]
+script = ExtResource("11_cbt")
+Attack = ExtResource("12_atk")
 
 [node name="PlayerInputComponent" type="Node" parent="." unique_id=1731902976]
 script = ExtResource("7_input")

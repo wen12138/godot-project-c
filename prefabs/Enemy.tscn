@@ -7,6 +7,7 @@
 [ext_resource type="Script" uid="uid://dhqsg4cc7u05j" path="res://scripts/MovementComponent.cs" id="4_hxbby"]
 [ext_resource type="Texture2D" uid="uid://86mipi2fra0q" path="res://sprites/forward_arrow.png" id="6_oovrp"]
 [ext_resource type="Resource" path="res://data/actors/enemy_default.tres" id="8_actor_def"]
+[ext_resource type="Script" path="res://scripts/HurtboxComponent.cs" id="9_hurt"]
 
 [node name="Enemy" type="Node2D" unique_id=1297045618]
 script = ExtResource("1_duu5m")
@@ -17,6 +18,13 @@ script = ExtResource("3_oovrp")
 
 [node name="MovementComponent" type="Node" parent="." unique_id=1629148371]
 script = ExtResource("4_hxbby")
+
+[node name="HurtboxComponent" type="Node2D" parent="."]
+script = ExtResource("9_hurt")
+Team = 1
+Offset = Vector3(0, 0, 36)
+Size = Vector3(36, 24, 72)
+DebugDrawEnabled = true
 
 [node name="Shadow" type="Sprite2D" parent="." unique_id=113315737]
 texture = ExtResource("4_hgomy")
