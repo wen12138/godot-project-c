@@ -90,8 +90,11 @@ public partial class HurtboxComponent : Node2D
 			return;
 		}
 
-		var rect = aabb.ToActorLocalRect(m_Transform.GetLogicX(), m_Transform.GetLogicDepth());
-		DrawRect(rect, new Color(0.2f, 0.85f, 0.35f, 0.15f), filled: true);
-		DrawRect(rect, new Color(0.2f, 0.85f, 0.35f, 0.9f), filled: false, width: 2f);
+		CombatDebugDraw.DrawVolume(
+			this,
+			aabb,
+			m_Transform.GetLogicX(),
+			m_Transform.GetLogicDepth(),
+			new Color(0.2f, 0.85f, 0.35f, 0.9f));
 	}
 }

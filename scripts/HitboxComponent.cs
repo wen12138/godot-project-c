@@ -145,8 +145,11 @@ public partial class HitboxComponent : Node2D
 			return;
 		}
 
-		var rect = aabb.ToActorLocalRect(m_Transform.GetLogicX(), m_Transform.GetLogicDepth());
-		DrawRect(rect, new Color(0.95f, 0.2f, 0.2f, 0.2f), filled: true);
-		DrawRect(rect, new Color(0.95f, 0.2f, 0.2f, 0.95f), filled: false, width: 2f);
+		CombatDebugDraw.DrawVolume(
+			this,
+			aabb,
+			m_Transform.GetLogicX(),
+			m_Transform.GetLogicDepth(),
+			new Color(0.95f, 0.2f, 0.2f, 0.95f));
 	}
 }

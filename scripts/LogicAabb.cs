@@ -54,4 +54,29 @@ public readonly struct LogicAabb
 			- (Center.Z - HalfExtents.Z) * MapCoordinates.HeightToScreenY;
 		return new Rect2(minX, minY, maxX - minX, maxY - minY);
 	}
+
+	/// <summary>
+	/// 贴地占位：只投影 X 与 LogicDepth，不含高度。minY 是朝屏幕上方（里巷）的深度边。
+	/// </summary>
+	public Rect2 ToGroundFootprintRect(float actorLogicX, float actorLogicDepth)
+	{
+		var minX = Center.X - HalfExtents.X - actorLogicX;
+		var maxX = Center.X + HalfExtents.X - actorLogicX;
+		var minY = (Center.Y - HalfExtents.Y - actorLogicDepth) * MapCoordinates.DepthToScreenY;
+		var maxY = (Center.Y + HalfExtents.Y - actorLogicDepth) * MapCoordinates.DepthToScreenY;
+		return new Rect2(minX, minY, maxX - minX, maxY - minY);
+	}
+
+	/// <summary>
+	/// 指定逻辑深度处的 X-Z 立面（侧视高度盒）。
+	/// </summary>
+	public Rect2 ToHeightFaceRect(float actorLogicX, float actorLogicDepth, float logicDepth)
+	{
+		var minX = Center.X - HalfExtents.X - actorLogicX;
+		var maxX = Center.X + HalfExtents.X - actorLogicX;
+		var screenY = (logicDepth - actorLogicDepth) * MapCoordinates.DepthToScreenY;
+		var minY = screenY - (Center.Z + HalfExtents.Z) * MapCoordinates.HeightToScreenY;
+		var maxY = screenY - (Center.Z - HalfExtents.Z) * MapCoordinates.HeightToScreenY;
+		return new Rect2(minX, minY, maxX - minX, maxY - minY);
+	}
 }
