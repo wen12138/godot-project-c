@@ -11,7 +11,10 @@ public partial class Player : Actor
 		if (m_PlayerInputComponent == null)
 		{
 			GD.PushError($"{GetPath()}: missing child PlayerInputComponent");
+			return;
 		}
+
+		m_PlayerInputComponent.Bind(Movement, Combat);
 	}
 
 	public override void _PhysicsProcess(double delta)

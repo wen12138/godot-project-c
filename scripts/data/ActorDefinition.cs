@@ -7,5 +7,8 @@ public partial class ActorDefinition : Resource
 	public string Id { get; set; } = "";
 
 	[Export]
-	public ActorMovementConfig Movement { get; set; }
+	public CombatAttributes Attributes { get; set; }
+
+	[Export]
+	public JobDefinition Job { get; set; }
 }

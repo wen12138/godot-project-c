@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="JobDefinition" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/JobDefinition.cs" id="1_job"]
+[ext_resource type="PackedScene" path="res://prefabs/locomotion/ground_locomotion.tscn" id="2_loco"]
+[ext_resource type="Resource" path="res://data/actors/movement/enemy_default_move.tres" id="3_move"]
+
+[resource]
+script = ExtResource("1_job")
+Locomotion = ExtResource("2_loco")
+Movement = ExtResource("3_move")

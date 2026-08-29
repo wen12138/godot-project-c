@@ -1,9 +1,11 @@
-[gd_resource type="Resource" script_class="ActorDefinition" load_steps=3 format=3]
+[gd_resource type="Resource" script_class="ActorDefinition" load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://scripts/data/ActorDefinition.cs" id="1_def"]
-[ext_resource type="Resource" path="res://data/actors/movement/enemy_default_move.tres" id="2_move"]
+[ext_resource type="Resource" path="res://data/actors/attributes/enemy_default_attr.tres" id="2_attr"]
+[ext_resource type="Resource" path="res://data/actors/jobs/enemy_default_job.tres" id="3_job"]
 
 [resource]
 script = ExtResource("1_def")
 Id = "enemy_default"
-Movement = ExtResource("2_move")
+Attributes = ExtResource("2_attr")
+Job = ExtResource("3_job")

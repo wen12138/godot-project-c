@@ -4,10 +4,10 @@
 [ext_resource type="Texture2D" uid="uid://c6erh3dib8raw" path="res://sprites/Enemy.png" id="2_duu5m"]
 [ext_resource type="Script" uid="uid://b3gamf6set2xf" path="res://scripts/TransformComponent.cs" id="3_oovrp"]
 [ext_resource type="Texture2D" uid="uid://1su0dahvuixp" path="res://sprites/shadow.png" id="4_hgomy"]
-[ext_resource type="Script" uid="uid://dhqsg4cc7u05j" path="res://scripts/MovementComponent.cs" id="4_hxbby"]
 [ext_resource type="Texture2D" uid="uid://86mipi2fra0q" path="res://sprites/forward_arrow.png" id="6_oovrp"]
 [ext_resource type="Resource" path="res://data/actors/enemy_default.tres" id="8_actor_def"]
 [ext_resource type="Script" path="res://scripts/HurtboxComponent.cs" id="9_hurt"]
+[ext_resource type="Script" path="res://scripts/HealthComponent.cs" id="10_hp"]
 
 [node name="Enemy" type="Node2D" unique_id=1297045618]
 script = ExtResource("1_duu5m")
@@ -16,8 +16,8 @@ Definition = ExtResource("8_actor_def")
 [node name="TransformComponent" type="Node" parent="." unique_id=1863022047]
 script = ExtResource("3_oovrp")
 
-[node name="MovementComponent" type="Node" parent="." unique_id=1629148371]
-script = ExtResource("4_hxbby")
+[node name="HealthComponent" type="Node" parent="."]
+script = ExtResource("10_hp")
 
 [node name="HurtboxComponent" type="Node2D" parent="."]
 script = ExtResource("9_hurt")

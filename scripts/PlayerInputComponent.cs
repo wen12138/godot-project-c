@@ -5,19 +5,10 @@ public partial class PlayerInputComponent : Node
 	private MovementComponent m_Movement;
 	private CombatComponent m_Combat;
 
-	public override void _Ready()
+	public void Bind(MovementComponent movement, CombatComponent combat)
 	{
-		m_Movement = GetNodeOrNull<MovementComponent>("../MovementComponent");
-		if (m_Movement == null)
-		{
-			GD.PushError("PlayerInputComponent: missing sibling MovementComponent at ../MovementComponent");
-		}
-
-		m_Combat = GetNodeOrNull<CombatComponent>("../CombatComponent");
-		if (m_Combat == null)
-		{
-			GD.PushError("PlayerInputComponent: missing sibling CombatComponent at ../CombatComponent");
-		}
+		m_Movement = movement;
+		m_Combat = combat;
 	}
 
 	public void PhysicsTick(double delta)

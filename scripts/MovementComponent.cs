@@ -24,18 +24,32 @@ public partial class MovementComponent : Node
 			return;
 		}
 
-		if (actor.Definition.Movement == null)
+		if (actor.Definition.Job == null)
 		{
-			GD.PushError($"{GetPath()}: Actor.Definition.Movement is null (Id={actor.Definition.Id})");
+			GD.PushError($"{GetPath()}: Actor.Definition.Job is null (Id={actor.Definition.Id})");
 			return;
 		}
 
-		m_MovementConfig = actor.Definition.Movement;
+		if (actor.Definition.Job.Movement == null)
+		{
+			GD.PushError($"{GetPath()}: Actor.Definition.Job.Movement is null (Id={actor.Definition.Id})");
+			return;
+		}
 
-		m_Transform = GetNodeOrNull<TransformComponent>("../TransformComponent");
+		m_MovementConfig = actor.Definition.Job.Movement;
+
+		foreach (var child in actor.GetChildren())
+		{
+			if (child is TransformComponent transform)
+			{
+				m_Transform = transform;
+				break;
+			}
+		}
+
 		if (m_Transform == null)
 		{
-			GD.PushError($"{GetPath()}: missing sibling TransformComponent at ../TransformComponent");
+			GD.PushError($"{GetPath()}: missing TransformComponent under parent Actor");
 		}
 	}
 

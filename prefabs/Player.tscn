@@ -4,14 +4,13 @@
 [ext_resource type="Texture2D" uid="uid://cr3y2v2ur2ny3" path="res://sprites/Player.png" id="2_wuy1y"]
 [ext_resource type="Script" uid="uid://b3gamf6set2xf" path="res://scripts/TransformComponent.cs" id="3_1nynx"]
 [ext_resource type="Texture2D" uid="uid://1su0dahvuixp" path="res://sprites/shadow.png" id="4_1nynx"]
-[ext_resource type="Script" uid="uid://dhqsg4cc7u05j" path="res://scripts/MovementComponent.cs" id="4_64pgi"]
 [ext_resource type="Texture2D" uid="uid://86mipi2fra0q" path="res://sprites/forward_arrow.png" id="6_64pgi"]
 [ext_resource type="Script" uid="uid://h4k2254ksqs3" path="res://scripts/PlayerInputComponent.cs" id="7_input"]
 [ext_resource type="Resource" path="res://data/actors/player_default.tres" id="8_actor_def"]
 [ext_resource type="Script" path="res://scripts/HurtboxComponent.cs" id="9_hurt"]
 [ext_resource type="Script" path="res://scripts/HitboxComponent.cs" id="10_hit"]
 [ext_resource type="Script" path="res://scripts/CombatComponent.cs" id="11_cbt"]
-[ext_resource type="Resource" path="res://data/actors/attacks/player_melee_default.tres" id="12_atk"]
+[ext_resource type="Script" path="res://scripts/HealthComponent.cs" id="13_hp"]
 
 [node name="Player" type="Node2D" unique_id=1297045618]
 script = ExtResource("1_p3xyx")
@@ -20,8 +19,8 @@ Definition = ExtResource("8_actor_def")
 [node name="TransformComponent" type="Node" parent="." unique_id=1863022047]
 script = ExtResource("3_1nynx")
 
-[node name="MovementComponent" type="Node" parent="." unique_id=1629148371]
-script = ExtResource("4_64pgi")
+[node name="HealthComponent" type="Node" parent="."]
+script = ExtResource("13_hp")
 
 [node name="HurtboxComponent" type="Node2D" parent="."]
 script = ExtResource("9_hurt")
@@ -37,7 +36,6 @@ DebugDrawEnabled = true
 
 [node name="CombatComponent" type="Node" parent="."]
 script = ExtResource("11_cbt")
-Attack = ExtResource("12_atk")
 
 [node name="PlayerInputComponent" type="Node" parent="." unique_id=1731902976]
 script = ExtResource("7_input")

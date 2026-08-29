@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="CombatAttributes" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/CombatAttributes.cs" id="1_attr"]
+
+[resource]
+script = ExtResource("1_attr")
+BaseHealth = 100
+BaseAttack = 10
