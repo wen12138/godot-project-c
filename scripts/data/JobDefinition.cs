@@ -10,14 +10,14 @@ public partial class JobDefinition : Resource
 	public ActorMovementConfig Movement { get; set; }
 
 	[Export]
-	public AttackData Attack { get; set; }
+	public SkillDefinition Attack { get; set; }
 
 	[Export]
 	public PackedScene Dodge { get; set; }
 
 	[Export]
-	public PackedScene Skill { get; set; }
+	public SkillDefinition Skill { get; set; }
 
 	[Export]
-	public PackedScene Ultimate { get; set; }
+	public SkillDefinition Ultimate { get; set; }
 }

@@ -1,9 +1,0 @@
-[gd_resource type="Resource" script_class="AttackData" load_steps=2 format=3]
-
-[ext_resource type="Script" path="res://scripts/data/AttackData.cs" id="1_atk"]
-
-[resource]
-script = ExtResource("1_atk")
-ActiveDuration = 0.2
-HitboxOffset = Vector3(48, 0, 36)
-HitboxSize = Vector3(72, 28, 72)

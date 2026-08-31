@@ -8,7 +8,6 @@ public partial class PlayAttackModule : SkillModule
 
 	public override void OnActivate(CombatComponent combat, SkillInstance instance)
 	{
-		_ = combat;
-		_ = instance;
+		combat?.BeginPlayAttack(instance, Spec);
 	}
 }

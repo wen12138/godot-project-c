@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="SkillDefinition" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/SkillDefinition.cs" id="1_def"]
+[ext_resource type="Script" path="res://scripts/data/PlayAttackModule.cs" id="2_mod"]
+[ext_resource type="Resource" path="res://data/actors/attacks/player_melee_spec.tres" id="3_spec"]
+
+[sub_resource type="Resource" id="Play_1"]
+script = ExtResource("2_mod")
+Spec = ExtResource("3_spec")
+
+[resource]
+script = ExtResource("1_def")
+ConfigId = "skill.player_default.attack"
+Kind = 0
+Cost = 0
+Cooldown = 0.0
+Stacking = 0
+Targeting = 0
+AreaRadius = 0.0
+Modules = [SubResource("Play_1")]

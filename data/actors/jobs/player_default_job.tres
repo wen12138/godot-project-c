@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://scripts/data/JobDefinition.cs" id="1_job"]
 [ext_resource type="PackedScene" path="res://prefabs/locomotion/ground_locomotion.tscn" id="2_loco"]
 [ext_resource type="Resource" path="res://data/actors/movement/player_default_move.tres" id="3_move"]
-[ext_resource type="Resource" path="res://data/actors/attacks/player_melee_default.tres" id="4_atk"]
+[ext_resource type="Resource" path="res://data/actors/skills/player_default_attack.tres" id="4_atk"]
 
 [resource]
 script = ExtResource("1_job")
