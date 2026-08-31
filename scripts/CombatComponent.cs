@@ -484,7 +484,55 @@ public partial class CombatComponent : Node
 
 	private void TryAddCharge(EffectInstance effect)
 	{
-		_ = effect;
+		if (effect.Blueprint.ChargeMax <= 0 || effect.BurstConsumed)
+		{
+			return;
+		}
+
+		effect.Charge += 1;
+		GD.Print($"CombatComponent: charge {effect.Charge}/{effect.Blueprint.ChargeMax} cfg={effect.SourceConfigId}");
+		if (effect.Charge >= effect.Blueprint.ChargeMax)
+		{
+			HandleBurst(effect);
+			m_Effects.RemoveBySourceRuntimeId(effect.SourceRuntimeId, expire: false);
+			RemoveInstanceIfOrphan(effect.SourceRuntimeId);
+		}
+	}
+
+	public void OnEffectExpired(EffectInstance effect)
+	{
+		if (!effect.BurstConsumed)
+		{
+			HandleBurst(effect);
+		}
+	}
+
+	private void HandleBurst(EffectInstance effect)
+	{
+		effect.BurstConsumed = true;
+		var damage = effect.Blueprint.BurstDamage;
+		if (damage <= 0)
+		{
+			return;
+		}
+
+		var radius = effect.Blueprint.BurstRadius;
+		foreach (var target in CollectTargets(SkillTargeting.EnemiesInRadius, radius))
+		{
+			target.Health?.TakeDamage(damage);
+			GD.Print($"CombatComponent: burst hit {target.Name} dmg={damage}");
+		}
+	}
+
+	private void RemoveInstanceIfOrphan(uint runtimeId)
+	{
+		for (var i = m_Instances.Count - 1; i >= 0; i--)
+		{
+			if (m_Instances[i].RuntimeId == runtimeId && !InstanceStillAlive(m_Instances[i]))
+			{
+				m_Instances.RemoveAt(i);
+			}
+		}
 	}
 
 	private void OnHit(HurtboxComponent hurtbox, int attackId)
@@ -613,11 +661,6 @@ public partial class CombatComponent : Node
 		}
 
 		effect.Target.Health.TakeDamage(effect.Blueprint.TickDamage);
-	}
-
-	public void OnEffectExpired(EffectInstance effect)
-	{
-		_ = effect;
 	}
 
 	private List<Actor> CollectTargets(SkillTargeting targeting, float radius)
