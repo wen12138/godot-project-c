@@ -8,6 +8,8 @@ public static class InputActions
 	public const string MoveRight = "move_right";
 	public const string Jump = "jump";
 	public const string Attack = "attack";
+	public const string Skill = "skill";
+	public const string Ultimate = "ultimate";
 
 	public static Vector2 GetMoveVector()
 	{
@@ -22,5 +24,15 @@ public static class InputActions
 	public static bool IsAttackJustPressed()
 	{
 		return Input.IsActionJustPressed(Attack);
+	}
+
+	public static bool IsSkillJustPressed()
+	{
+		return Input.IsActionJustPressed(Skill);
+	}
+
+	public static bool IsUltimateJustPressed()
+	{
+		return Input.IsActionJustPressed(Ultimate);
 	}
 }

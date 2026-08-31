@@ -1,12 +1,14 @@
-[gd_resource type="Resource" script_class="JobDefinition" load_steps=5 format=3]
+[gd_resource type="Resource" script_class="JobDefinition" load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://scripts/data/JobDefinition.cs" id="1_job"]
 [ext_resource type="PackedScene" path="res://prefabs/locomotion/ground_locomotion.tscn" id="2_loco"]
 [ext_resource type="Resource" path="res://data/actors/movement/player_default_move.tres" id="3_move"]
 [ext_resource type="Resource" path="res://data/actors/skills/player_default_attack.tres" id="4_atk"]
+[ext_resource type="Resource" path="res://data/actors/skills/player_dummy_aura_skill.tres" id="5_skill"]
 
 [resource]
 script = ExtResource("1_job")
 Locomotion = ExtResource("2_loco")
 Movement = ExtResource("3_move")
 Attack = ExtResource("4_atk")
+Skill = ExtResource("5_skill")

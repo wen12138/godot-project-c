@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="SkillDefinition" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/SkillDefinition.cs" id="1_def"]
+[ext_resource type="Script" path="res://scripts/data/ApplyEffectModule.cs" id="2_mod"]
+[ext_resource type="Resource" path="res://data/actors/effects/player_dummy_aura.tres" id="3_fx"]
+
+[sub_resource type="Resource" id="Apply_1"]
+script = ExtResource("2_mod")
+Effect = ExtResource("3_fx")
+
+[resource]
+script = ExtResource("1_def")
+ConfigId = "skill.player_default.dummy_aura"
+Kind = 1
+Cost = 0
+Cooldown = 0.0
+Stacking = 0
+Targeting = 0
+AreaRadius = 0.0
+Modules = [SubResource("Apply_1")]

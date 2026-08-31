@@ -27,5 +27,15 @@ public partial class PlayerInputComponent : Node
 		{
 			m_Combat.TryStartAttack();
 		}
+
+		if (m_Combat != null && InputActions.IsSkillJustPressed())
+		{
+			m_Combat.TryStartSkill();
+		}
+
+		if (m_Combat != null && InputActions.IsUltimateJustPressed())
+		{
+			m_Combat.TryStartUltimate();
+		}
 	}
 }

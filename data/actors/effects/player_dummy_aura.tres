@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="GameplayEffect" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/GameplayEffect.cs" id="1_fx"]
+
+[resource]
+script = ExtResource("1_fx")
+Duration = 3.0
+Period = 0.0
+TickDamage = 0
+SubscribeBasic = true
+SubscribeSkill = false
+ExtraHitboxDuration = 0.15
+ChargeMax = 0
+BurstDamage = 0
+BurstRadius = 80.0
