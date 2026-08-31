@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="AttackSpec" format=3 uid="uid://bq3meleecombo3k"]
+[gd_resource type="Resource" script_class="AttackSpec" format=3]
 
 [ext_resource type="Script" uid="uid://bcefrd1075htg" path="res://scripts/data/AttackSpec.cs" id="1_spec"]
 [ext_resource type="Script" uid="uid://4ay68nn16gn1" path="res://scripts/data/HitboxEntry.cs" id="2_entry"]
