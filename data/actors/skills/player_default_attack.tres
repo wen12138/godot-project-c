@@ -5,10 +5,12 @@
 [ext_resource type="Script" uid="uid://rshcksbj33gl" path="res://scripts/data/PlayAttackModule.cs" id="2_mod"]
 [ext_resource type="Resource" uid="uid://d2y8fvybllykp" path="res://data/actors/attacks/player_melee_spec.tres" id="3_spec"]
 [ext_resource type="Script" uid="uid://bcefrd1075htg" path="res://scripts/data/AttackSpec.cs" id="4_spec_script"]
+[ext_resource type="Resource" uid="uid://bq2meleecombo2k" path="res://data/actors/attacks/player_melee_spec_2.tres" id="5_spec2"]
+[ext_resource type="Resource" uid="uid://bq3meleecombo3k" path="res://data/actors/attacks/player_melee_spec_3.tres" id="6_spec3"]
 
 [sub_resource type="Resource" id="Play_1"]
 script = ExtResource("2_mod")
-Specs = Array[ExtResource("4_spec_script")]([ExtResource("3_spec")])
+Specs = Array[ExtResource("4_spec_script")]([ExtResource("3_spec"), ExtResource("5_spec2"), ExtResource("6_spec3")])
 
 [resource]
 script = ExtResource("1_def")
