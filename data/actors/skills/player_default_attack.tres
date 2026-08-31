@@ -4,10 +4,11 @@
 [ext_resource type="Script" uid="uid://ihoicuf6r0uw" path="res://scripts/data/SkillModule.cs" id="1_jd6wy"]
 [ext_resource type="Script" uid="uid://rshcksbj33gl" path="res://scripts/data/PlayAttackModule.cs" id="2_mod"]
 [ext_resource type="Resource" uid="uid://d2y8fvybllykp" path="res://data/actors/attacks/player_melee_spec.tres" id="3_spec"]
+[ext_resource type="Script" uid="uid://bcefrd1075htg" path="res://scripts/data/AttackSpec.cs" id="4_spec_script"]
 
 [sub_resource type="Resource" id="Play_1"]
 script = ExtResource("2_mod")
-Spec = ExtResource("3_spec")
+Specs = Array[ExtResource("4_spec_script")]([ExtResource("3_spec")])
 
 [resource]
 script = ExtResource("1_def")

@@ -16,6 +16,9 @@ public partial class AttackSpec : Resource
 	public float CancelOpenAt { get; set; } = -1f;
 
 	[Export]
+	public float FollowUpWindow { get; set; } = 0.5f;
+
+	[Export]
 	public Godot.Collections.Array<HitboxEntry> Hitboxes { get; set; } = new();
 
 	public float TotalDuration => Mathf.Max(0f, Startup) + Mathf.Max(0f, Active) + Mathf.Max(0f, Recovery);

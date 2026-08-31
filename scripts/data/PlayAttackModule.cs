@@ -4,10 +4,15 @@ using Godot;
 public partial class PlayAttackModule : SkillModule
 {
 	[Export]
-	public AttackSpec Spec { get; set; }
+	public Godot.Collections.Array<AttackSpec> Specs { get; set; } = new();
 
 	public override void OnActivate(CombatComponent combat, SkillInstance instance)
 	{
-		combat?.BeginPlayAttack(instance, Spec);
+		if (combat == null)
+		{
+			return;
+		}
+
+		combat.BeginPlayAttack(instance, this);
 	}
 }

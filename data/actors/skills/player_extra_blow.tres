@@ -6,10 +6,11 @@
 [ext_resource type="Resource" uid="uid://c12hbeiu2l1n3" path="res://data/actors/attacks/player_skill_poke_spec.tres" id="3_spec"]
 [ext_resource type="Script" uid="uid://cdpw32kjy2v24" path="res://scripts/data/GrantListenerModule.cs" id="4_grant"]
 [ext_resource type="Resource" uid="uid://d41gs2kso2m2" path="res://data/actors/effects/player_extra_blow_listener.tres" id="5_fx"]
+[ext_resource type="Script" uid="uid://bcefrd1075htg" path="res://scripts/data/AttackSpec.cs" id="6_spec_script"]
 
 [sub_resource type="Resource" id="Play_1"]
 script = ExtResource("2_play")
-Spec = ExtResource("3_spec")
+Specs = Array[ExtResource("6_spec_script")]([ExtResource("3_spec")])
 
 [sub_resource type="Resource" id="Grant_1"]
 script = ExtResource("4_grant")

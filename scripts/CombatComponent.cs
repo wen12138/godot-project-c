@@ -192,7 +192,43 @@ public partial class CombatComponent : Node
 		return true;
 	}
 
-	public void BeginPlayAttack(SkillInstance instance, AttackSpec spec)
+	public void BeginPlayAttack(SkillInstance instance, PlayAttackModule module)
+	{
+		if (instance == null || module == null)
+		{
+			GD.PushError($"{GetPath()}: BeginPlayAttack missing instance or module");
+			return;
+		}
+
+		var spec = GetFirstSpec(module);
+		if (spec == null)
+		{
+			GD.PushError($"{GetPath()}: AttackSpec list is empty ({instance.ConfigId})");
+			return;
+		}
+
+		BeginPlayAttackFromSpec(instance, spec);
+	}
+
+	private static AttackSpec GetFirstSpec(PlayAttackModule module)
+	{
+		if (module.Specs == null)
+		{
+			return null;
+		}
+
+		foreach (var spec in module.Specs)
+		{
+			if (spec != null)
+			{
+				return spec;
+			}
+		}
+
+		return null;
+	}
+
+	private void BeginPlayAttackFromSpec(SkillInstance instance, AttackSpec spec)
 	{
 		if (instance == null || spec == null)
 		{
