@@ -53,24 +53,38 @@ public partial class MovementComponent : Node
 		}
 	}
 
+	public bool IsOnGround
+	{
+		get
+		{
+			if (m_Transform == null)
+			{
+				return true;
+			}
+
+			return IsGrounded(m_Transform.GetVirtualZ());
+		}
+	}
+
 	public void SetMoveInput(Vector2 direction)
 	{
 		m_MoveInput = direction == Vector2.Zero ? Vector2.Zero : direction.Normalized();
 	}
 
-	public void Jump()
+	public bool Jump()
 	{
 		if (m_MovementConfig == null || m_Transform == null)
 		{
-			return;
+			return false;
 		}
 
 		if (!IsGrounded(m_Transform.GetVirtualZ()))
 		{
-			return;
+			return false;
 		}
 
 		m_VerticalVelocity = m_MovementConfig.BaseJumpForce;
+		return true;
 	}
 
 	public void PhysicsTick(double delta)

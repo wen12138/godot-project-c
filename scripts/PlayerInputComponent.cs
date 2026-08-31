@@ -13,29 +13,61 @@ public partial class PlayerInputComponent : Node
 
 	public void PhysicsTick(double delta)
 	{
+		_ = delta;
+		var playBusy = m_Combat != null && m_Combat.IsPlayOccupied;
+		var grounded = m_Movement == null || m_Movement.IsOnGround;
+
 		if (m_Movement != null)
 		{
-			m_Movement.SetMoveInput(InputActions.GetMoveVector());
+			m_Movement.SetMoveInput(playBusy ? Vector2.Zero : InputActions.GetMoveVector());
+		}
 
-			if (InputActions.IsJumpJustPressed())
+		if (m_Combat == null)
+		{
+			if (m_Movement != null && InputActions.IsJumpJustPressed() && !playBusy)
 			{
 				m_Movement.Jump();
 			}
+
+			return;
 		}
 
-		if (m_Combat != null && InputActions.IsAttackJustPressed())
+		if (InputActions.IsUltimateJustPressed())
 		{
-			m_Combat.TryStartAttack();
+			if (grounded && !playBusy)
+			{
+				m_Combat.TryStartUltimate();
+			}
+
+			return;
 		}
 
-		if (m_Combat != null && InputActions.IsSkillJustPressed())
+		if (InputActions.IsSkillJustPressed())
 		{
-			m_Combat.TryStartSkill();
+			if (grounded && !playBusy)
+			{
+				m_Combat.TryStartSkill();
+			}
+
+			return;
 		}
 
-		if (m_Combat != null && InputActions.IsUltimateJustPressed())
+		if (InputActions.IsAttackJustPressed())
 		{
-			m_Combat.TryStartUltimate();
+			if (grounded && !playBusy)
+			{
+				m_Combat.TryStartAttack();
+			}
+
+			return;
+		}
+
+		if (InputActions.IsJumpJustPressed() && !playBusy && m_Movement != null)
+		{
+			if (m_Movement.Jump())
+			{
+				m_Combat.BreakCombo();
+			}
 		}
 	}
 }
