@@ -25,12 +25,19 @@ public partial class CombatComponent : Node
 	private readonly Dictionary<int, StrikeInfo> m_Strikes = new();
 	private readonly Dictionary<string, float> m_CooldownRemaining = new();
 	private readonly EffectHolder m_Effects = new();
+	private readonly List<ListenerBox> m_ListenerBoxes = new();
 
 	private struct StrikeInfo
 	{
 		public uint RuntimeId;
 		public AttackKind Kind;
 		public bool FromListener;
+	}
+
+	private struct ListenerBox
+	{
+		public int AttackId;
+		public float Remaining;
 	}
 
 	public bool IsAttacking => FindBasicPlayAttack() != null;
@@ -69,6 +76,10 @@ public partial class CombatComponent : Node
 		ValidateSlot(m_Actor.Definition.Job.Ultimate, expectedKind: AttackKind.Skill, slotName: "Ultimate");
 
 		m_Hitbox.Hit += OnHit;
+		BasicAttackStarted += OnBasicAttackStarted;
+		SkillAttackStarted += OnSkillAttackStarted;
+		BasicAttackHit += OnBasicAttackHit;
+		SkillAttackHit += OnSkillAttackHit;
 
 		m_Health = GetNodeOrNull<HealthComponent>("../HealthComponent");
 		if (m_Health != null)
@@ -83,6 +94,11 @@ public partial class CombatComponent : Node
 		{
 			m_Hitbox.Hit -= OnHit;
 		}
+
+		BasicAttackStarted -= OnBasicAttackStarted;
+		SkillAttackStarted -= OnSkillAttackStarted;
+		BasicAttackHit -= OnBasicAttackHit;
+		SkillAttackHit -= OnSkillAttackHit;
 
 		if (m_Health != null)
 		{
@@ -225,6 +241,7 @@ public partial class CombatComponent : Node
 		var dt = (float)delta;
 		TickCooldowns(dt);
 		TickPlayAttacks(dt);
+		TickListenerBoxes(dt);
 		m_Effects.PhysicsTick(dt, this);
 	}
 
@@ -341,6 +358,135 @@ public partial class CombatComponent : Node
 		}
 	}
 
+	private void OnBasicAttackStarted(int attackId, int runtimeId)
+	{
+		_ = attackId;
+		_ = runtimeId;
+		FanOutStarted(subscribeSkill: false);
+	}
+
+	private void OnSkillAttackStarted(int attackId, int runtimeId)
+	{
+		_ = attackId;
+		_ = runtimeId;
+		FanOutStarted(subscribeSkill: true);
+	}
+
+	private void OnBasicAttackHit(int attackId, int runtimeId, HurtboxComponent hurtbox)
+	{
+		_ = attackId;
+		_ = runtimeId;
+		_ = hurtbox;
+		foreach (var effect in m_Effects.SnapshotListeners())
+		{
+			if (effect.Target != m_Actor || !effect.Blueprint.SubscribeBasic)
+			{
+				continue;
+			}
+
+			TryAddCharge(effect);
+		}
+	}
+
+	private void OnSkillAttackHit(int attackId, int runtimeId, HurtboxComponent hurtbox)
+	{
+		_ = attackId;
+		_ = runtimeId;
+		_ = hurtbox;
+		foreach (var effect in m_Effects.SnapshotListeners())
+		{
+			if (effect.Target != m_Actor || !effect.Blueprint.SubscribeSkill)
+			{
+				continue;
+			}
+
+			TryAddCharge(effect);
+		}
+	}
+
+	private void FanOutStarted(bool subscribeSkill)
+	{
+		foreach (var effect in m_Effects.SnapshotListeners())
+		{
+			if (effect.Target != m_Actor)
+			{
+				continue;
+			}
+
+			var listen = subscribeSkill ? effect.Blueprint.SubscribeSkill : effect.Blueprint.SubscribeBasic;
+			if (!listen)
+			{
+				continue;
+			}
+
+			OpenListenerHitbox(effect);
+		}
+	}
+
+	private void OpenListenerHitbox(EffectInstance effect)
+	{
+		var entry = effect.Blueprint.ExtraHitbox;
+		if (entry == null)
+		{
+			return;
+		}
+
+		var attackId = m_NextAttackId;
+		m_NextAttackId += 1;
+		m_Strikes[attackId] = new StrikeInfo
+		{
+			RuntimeId = effect.SourceRuntimeId,
+			Kind = AttackKind.Skill,
+			FromListener = true
+		};
+		m_Hitbox.Activate(attackId, entry.Offset, entry.Size);
+		m_ListenerBoxes.Add(new ListenerBox
+		{
+			AttackId = attackId,
+			Remaining = Mathf.Max(0.01f, effect.Blueprint.ExtraHitboxDuration)
+		});
+	}
+
+	private void TickListenerBoxes(float dt)
+	{
+		for (var i = m_ListenerBoxes.Count - 1; i >= 0; i--)
+		{
+			var box = m_ListenerBoxes[i];
+			box.Remaining -= dt;
+			if (box.Remaining <= 0f)
+			{
+				m_Hitbox.Deactivate(box.AttackId);
+				m_Strikes.Remove(box.AttackId);
+				m_ListenerBoxes.RemoveAt(i);
+			}
+			else
+			{
+				m_ListenerBoxes[i] = box;
+			}
+		}
+	}
+
+	private void CloseListenerBoxesForSource(uint sourceRuntimeId)
+	{
+		for (var i = m_ListenerBoxes.Count - 1; i >= 0; i--)
+		{
+			var box = m_ListenerBoxes[i];
+			if (!m_Strikes.TryGetValue(box.AttackId, out var info) || info.RuntimeId != sourceRuntimeId)
+			{
+				continue;
+			}
+
+			m_Hitbox.Deactivate(box.AttackId);
+			m_Strikes.Remove(box.AttackId);
+			m_ListenerBoxes.RemoveAt(i);
+		}
+	}
+
+	private void TryAddCharge(EffectInstance effect)
+	{
+		_ = effect;
+	}
+
 	private void OnHit(HurtboxComponent hurtbox, int attackId)
 	{
 		var target = hurtbox.GetOwnerActor();
@@ -384,6 +530,7 @@ public partial class CombatComponent : Node
 			}
 
 			CancelPlayAttack(instance);
+			CloseListenerBoxesForSource(instance.RuntimeId);
 			m_Effects.RemoveBySourceRuntimeId(instance.RuntimeId, expire: false);
 			m_Instances.RemoveAt(i);
 		}
@@ -588,6 +735,7 @@ public partial class CombatComponent : Node
 
 		m_Hitbox?.DeactivateAll();
 		m_Strikes.Clear();
+		m_ListenerBoxes.Clear();
 		m_Effects.RemoveAll(expire: false);
 	}
 }
