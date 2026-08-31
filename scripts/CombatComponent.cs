@@ -78,15 +78,15 @@ public partial class CombatComponent : Node
 		if (m_Remaining <= 0f)
 		{
 			m_Remaining = 0f;
-			m_Hitbox.Deactivate();
+			m_Hitbox.DeactivateAll();
 		}
 	}
 
-	private void OnHit(HurtboxComponent hurtbox)
+	private void OnHit(HurtboxComponent hurtbox, int attackId)
 	{
 		var target = hurtbox.GetOwnerActor();
 		var name = target != null ? target.Name.ToString() : hurtbox.Name.ToString();
-		GD.Print($"CombatComponent: hit {name} attackId={m_Hitbox.CurrentAttackId}");
+		GD.Print($"CombatComponent: hit {name} attackId={attackId}");
 
 		var attacker = GetParentOrNull<Actor>();
 		if (attacker == null)

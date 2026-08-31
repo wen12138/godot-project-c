@@ -10,19 +10,21 @@ public partial class HitboxComponent : Node2D
 	public bool DebugDrawEnabled { get; set; } = true;
 
 	[Signal]
-	public delegate void HitEventHandler(HurtboxComponent hurtbox);
+	public delegate void HitEventHandler(HurtboxComponent hurtbox, int attackId);
+
+	private sealed class ActiveStrike
+	{
+		public int AttackId;
+		public Vector3 Offset;
+		public Vector3 Size;
+		public HashSet<HurtboxComponent> HitThisAttack = new();
+	}
 
 	private TransformComponent m_Transform;
 	private Actor m_OwnerActor;
-	private readonly HashSet<HurtboxComponent> m_HitThisAttack = new();
-	private bool m_Active;
-	private int m_AttackId;
-	private Vector3 m_Offset;
-	private Vector3 m_Size;
+	private readonly List<ActiveStrike> m_Strikes = new();
 
-	public bool IsActive => m_Active;
-
-	public int CurrentAttackId => m_AttackId;
+	public bool IsActive => m_Strikes.Count > 0;
 
 	public override void _Ready()
 	{
@@ -42,67 +44,96 @@ public partial class HitboxComponent : Node2D
 
 	public void Activate(int attackId, Vector3 offset, Vector3 size)
 	{
-		m_AttackId = attackId;
-		m_Offset = offset;
-		m_Size = size;
-		m_Active = true;
-		m_HitThisAttack.Clear();
+		for (var i = 0; i < m_Strikes.Count; i++)
+		{
+			if (m_Strikes[i].AttackId == attackId)
+			{
+				m_Strikes[i].Offset = offset;
+				m_Strikes[i].Size = size;
+				m_Strikes[i].HitThisAttack.Clear();
+				QueueRedraw();
+				return;
+			}
+		}
+
+		m_Strikes.Add(new ActiveStrike
+		{
+			AttackId = attackId,
+			Offset = offset,
+			Size = size
+		});
 		QueueRedraw();
 	}
 
-	public void Deactivate()
+	public void Deactivate(int attackId)
 	{
-		m_Active = false;
+		for (var i = m_Strikes.Count - 1; i >= 0; i--)
+		{
+			if (m_Strikes[i].AttackId == attackId)
+			{
+				m_Strikes.RemoveAt(i);
+			}
+		}
+
+		QueueRedraw();
+	}
+
+	public void DeactivateAll()
+	{
+		m_Strikes.Clear();
 		QueueRedraw();
 	}
 
 	public void PhysicsTick(double delta)
 	{
 		_ = delta;
-		if (!m_Active || m_Transform == null)
+		if (m_Strikes.Count == 0 || m_Transform == null)
 		{
 			return;
 		}
 
-		if (!TryGetWorldAabb(out var myAabb))
+		foreach (var strike in m_Strikes)
 		{
-			return;
-		}
-
-		foreach (var hurtbox in HurtboxRegistry.Snapshot())
-		{
-			if (hurtbox == null || !GodotObject.IsInstanceValid(hurtbox))
+			if (!TryGetWorldAabb(strike, out var myAabb))
 			{
 				continue;
 			}
 
-			var targetActor = hurtbox.GetOwnerActor();
-			if (targetActor == null || targetActor == m_OwnerActor)
+			foreach (var hurtbox in HurtboxRegistry.Snapshot())
 			{
-				continue;
-			}
+				if (hurtbox == null || !GodotObject.IsInstanceValid(hurtbox))
+				{
+					continue;
+				}
 
-			if (hurtbox.Team == Team)
-			{
-				continue;
-			}
+				var targetActor = hurtbox.GetOwnerActor();
+				if (targetActor == null || targetActor == m_OwnerActor)
+				{
+					continue;
+				}
 
-			if (!hurtbox.TryGetWorldAabb(out var theirAabb))
-			{
-				continue;
-			}
+				if (hurtbox.Team == Team)
+				{
+					continue;
+				}
 
-			if (!myAabb.Overlaps(theirAabb))
-			{
-				continue;
-			}
+				if (!hurtbox.TryGetWorldAabb(out var theirAabb))
+				{
+					continue;
+				}
 
-			if (!m_HitThisAttack.Add(hurtbox))
-			{
-				continue;
-			}
+				if (!myAabb.Overlaps(theirAabb))
+				{
+					continue;
+				}
 
-			EmitSignal(SignalName.Hit, hurtbox);
+				if (!strike.HitThisAttack.Add(hurtbox))
+				{
+					continue;
+				}
+
+				EmitSignal(SignalName.Hit, hurtbox, strike.AttackId);
+			}
 		}
 
 		if (DebugDrawEnabled)
@@ -111,26 +142,9 @@ public partial class HitboxComponent : Node2D
 		}
 	}
 
-	public bool TryGetWorldAabb(out LogicAabb aabb)
-	{
-		aabb = default;
-		if (!m_Active || m_Transform == null)
-		{
-			return false;
-		}
-
-		var signed = LogicAabb.ApplyFacingOffset(m_Offset, m_Transform.GetFacing());
-		var center = new Vector3(
-			m_Transform.GetLogicX() + signed.X,
-			m_Transform.GetLogicDepth() + signed.Y,
-			m_Transform.GetVirtualZ() + signed.Z);
-		aabb = LogicAabb.FromCenterSize(center, m_Size);
-		return aabb.HasVolume;
-	}
-
 	public override void _Draw()
 	{
-		if (!DebugDrawEnabled || !m_Active)
+		if (!DebugDrawEnabled || m_Strikes.Count == 0)
 		{
 			return;
 		}
@@ -140,16 +154,41 @@ public partial class HitboxComponent : Node2D
 			return;
 		}
 
-		if (m_Transform == null || !TryGetWorldAabb(out var aabb))
+		if (m_Transform == null)
 		{
 			return;
 		}
 
-		CombatDebugDraw.DrawVolume(
-			this,
-			aabb,
-			m_Transform.GetLogicX(),
-			m_Transform.GetLogicDepth(),
-			new Color(0.95f, 0.2f, 0.2f, 0.95f));
+		foreach (var strike in m_Strikes)
+		{
+			if (!TryGetWorldAabb(strike, out var aabb))
+			{
+				continue;
+			}
+
+			CombatDebugDraw.DrawVolume(
+				this,
+				aabb,
+				m_Transform.GetLogicX(),
+				m_Transform.GetLogicDepth(),
+				new Color(0.95f, 0.2f, 0.2f, 0.95f));
+		}
+	}
+
+	private bool TryGetWorldAabb(ActiveStrike strike, out LogicAabb aabb)
+	{
+		aabb = default;
+		if (m_Transform == null)
+		{
+			return false;
+		}
+
+		var signed = LogicAabb.ApplyFacingOffset(strike.Offset, m_Transform.GetFacing());
+		var center = new Vector3(
+			m_Transform.GetLogicX() + signed.X,
+			m_Transform.GetLogicDepth() + signed.Y,
+			m_Transform.GetVirtualZ() + signed.Z);
+		aabb = LogicAabb.FromCenterSize(center, strike.Size);
+		return aabb.HasVolume;
 	}
 }
