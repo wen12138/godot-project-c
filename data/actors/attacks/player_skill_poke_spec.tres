@@ -1,19 +1,14 @@
-[gd_resource type="Resource" script_class="AttackSpec" load_steps=4 format=3]
+[gd_resource type="Resource" script_class="AttackSpec" format=3 uid="uid://c12hbeiu2l1n3"]
 
-[ext_resource type="Script" path="res://scripts/data/AttackSpec.cs" id="1_spec"]
-[ext_resource type="Script" path="res://scripts/data/HitboxEntry.cs" id="2_entry"]
+[ext_resource type="Script" uid="uid://bcefrd1075htg" path="res://scripts/data/AttackSpec.cs" id="1_spec"]
+[ext_resource type="Script" uid="uid://4ay68nn16gn1" path="res://scripts/data/HitboxEntry.cs" id="2_entry"]
 
 [sub_resource type="Resource" id="Hitbox_1"]
 script = ExtResource("2_entry")
-Start = -1.0
-End = -1.0
-Offset = Vector3(48, 0, 36)
+Offset = Vector3(84, 0, 36)
 Size = Vector3(56, 28, 72)
 
 [resource]
 script = ExtResource("1_spec")
-Startup = 0.0
 Active = 0.12
-Recovery = 0.0
-CancelOpenAt = -1.0
-Hitboxes = [SubResource("Hitbox_1")]
+Hitboxes = Array[ExtResource("2_entry")]([SubResource("Hitbox_1")])

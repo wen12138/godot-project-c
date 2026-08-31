@@ -1,6 +1,6 @@
-[gd_resource type="Resource" script_class="JobDefinition" load_steps=7 format=3]
+[gd_resource type="Resource" script_class="JobDefinition" format=3 uid="uid://dybts2rekjbu2"]
 
-[ext_resource type="Script" path="res://scripts/data/JobDefinition.cs" id="1_job"]
+[ext_resource type="Script" uid="uid://dv5i1ilbddqxv" path="res://scripts/data/JobDefinition.cs" id="1_job"]
 [ext_resource type="PackedScene" path="res://prefabs/locomotion/ground_locomotion.tscn" id="2_loco"]
 [ext_resource type="Resource" path="res://data/actors/movement/player_default_move.tres" id="3_move"]
 [ext_resource type="Resource" path="res://data/actors/skills/player_default_attack.tres" id="4_atk"]

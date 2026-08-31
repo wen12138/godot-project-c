@@ -1,7 +1,8 @@
-[gd_resource type="Resource" script_class="SkillDefinition" load_steps=4 format=3]
+[gd_resource type="Resource" script_class="SkillDefinition" format=3 uid="uid://baltjtj77eld0"]
 
-[ext_resource type="Script" path="res://scripts/data/SkillDefinition.cs" id="1_def"]
-[ext_resource type="Script" path="res://scripts/data/GrantListenerModule.cs" id="2_mod"]
+[ext_resource type="Script" uid="uid://bunw65kkbmxys" path="res://scripts/data/SkillDefinition.cs" id="1_def"]
+[ext_resource type="Script" uid="uid://ihoicuf6r0uw" path="res://scripts/data/SkillModule.cs" id="1_hc6ds"]
+[ext_resource type="Script" uid="uid://cdpw32kjy2v24" path="res://scripts/data/GrantListenerModule.cs" id="2_mod"]
 [ext_resource type="Resource" path="res://data/actors/effects/player_charge_burst.tres" id="3_fx"]
 
 [sub_resource type="Resource" id="Grant_1"]
@@ -12,9 +13,4 @@ Effect = ExtResource("3_fx")
 script = ExtResource("1_def")
 ConfigId = "skill.player_default.charge_burst"
 Kind = 1
-Cost = 0
-Cooldown = 0.0
-Stacking = 0
-Targeting = 0
-AreaRadius = 0.0
-Modules = [SubResource("Grant_1")]
+Modules = Array[ExtResource("1_hc6ds")]([SubResource("Grant_1")])

@@ -1,10 +1,11 @@
-[gd_resource type="Resource" script_class="SkillDefinition" load_steps=6 format=3]
+[gd_resource type="Resource" script_class="SkillDefinition" format=3 uid="uid://bneanrhbee3qc"]
 
-[ext_resource type="Script" path="res://scripts/data/SkillDefinition.cs" id="1_def"]
-[ext_resource type="Script" path="res://scripts/data/PlayAttackModule.cs" id="2_play"]
-[ext_resource type="Resource" path="res://data/actors/attacks/player_skill_poke_spec.tres" id="3_spec"]
-[ext_resource type="Script" path="res://scripts/data/GrantListenerModule.cs" id="4_grant"]
-[ext_resource type="Resource" path="res://data/actors/effects/player_extra_blow_listener.tres" id="5_fx"]
+[ext_resource type="Script" uid="uid://ihoicuf6r0uw" path="res://scripts/data/SkillModule.cs" id="1_82j3k"]
+[ext_resource type="Script" uid="uid://bunw65kkbmxys" path="res://scripts/data/SkillDefinition.cs" id="1_def"]
+[ext_resource type="Script" uid="uid://rshcksbj33gl" path="res://scripts/data/PlayAttackModule.cs" id="2_play"]
+[ext_resource type="Resource" uid="uid://c12hbeiu2l1n3" path="res://data/actors/attacks/player_skill_poke_spec.tres" id="3_spec"]
+[ext_resource type="Script" uid="uid://cdpw32kjy2v24" path="res://scripts/data/GrantListenerModule.cs" id="4_grant"]
+[ext_resource type="Resource" uid="uid://d41gs2kso2m2" path="res://data/actors/effects/player_extra_blow_listener.tres" id="5_fx"]
 
 [sub_resource type="Resource" id="Play_1"]
 script = ExtResource("2_play")
@@ -18,9 +19,4 @@ Effect = ExtResource("5_fx")
 script = ExtResource("1_def")
 ConfigId = "skill.player_default.extra_blow"
 Kind = 1
-Cost = 0
-Cooldown = 0.0
-Stacking = 0
-Targeting = 0
-AreaRadius = 0.0
-Modules = [SubResource("Play_1"), SubResource("Grant_1")]
+Modules = Array[ExtResource("1_82j3k")]([SubResource("Play_1"), SubResource("Grant_1")])

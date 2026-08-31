@@ -1,8 +1,9 @@
-[gd_resource type="Resource" script_class="SkillDefinition" load_steps=4 format=3]
+[gd_resource type="Resource" script_class="SkillDefinition" format=3 uid="uid://ck00b1go2gvtp"]
 
-[ext_resource type="Script" path="res://scripts/data/SkillDefinition.cs" id="1_def"]
-[ext_resource type="Script" path="res://scripts/data/PlayAttackModule.cs" id="2_mod"]
-[ext_resource type="Resource" path="res://data/actors/attacks/player_melee_spec.tres" id="3_spec"]
+[ext_resource type="Script" uid="uid://bunw65kkbmxys" path="res://scripts/data/SkillDefinition.cs" id="1_def"]
+[ext_resource type="Script" uid="uid://ihoicuf6r0uw" path="res://scripts/data/SkillModule.cs" id="1_jd6wy"]
+[ext_resource type="Script" uid="uid://rshcksbj33gl" path="res://scripts/data/PlayAttackModule.cs" id="2_mod"]
+[ext_resource type="Resource" uid="uid://d2y8fvybllykp" path="res://data/actors/attacks/player_melee_spec.tres" id="3_spec"]
 
 [sub_resource type="Resource" id="Play_1"]
 script = ExtResource("2_mod")
@@ -11,10 +12,4 @@ Spec = ExtResource("3_spec")
 [resource]
 script = ExtResource("1_def")
 ConfigId = "skill.player_default.attack"
-Kind = 0
-Cost = 0
-Cooldown = 0.0
-Stacking = 0
-Targeting = 0
-AreaRadius = 0.0
-Modules = [SubResource("Play_1")]
+Modules = Array[ExtResource("1_jd6wy")]([SubResource("Play_1")])
