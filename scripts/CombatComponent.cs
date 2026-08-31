@@ -24,6 +24,7 @@ public partial class CombatComponent : Node
 	private readonly List<SkillInstance> m_Instances = new();
 	private readonly Dictionary<int, StrikeInfo> m_Strikes = new();
 	private readonly Dictionary<string, float> m_CooldownRemaining = new();
+	private readonly EffectHolder m_Effects = new();
 
 	private struct StrikeInfo
 	{
@@ -128,7 +129,7 @@ public partial class CombatComponent : Node
 			GD.PushError($"{GetPath()}: Stacking={def.Stacking} not implemented, using Replace ({def.ConfigId})");
 		}
 
-		if (!def.HasPlayAttack() && !HasGrantModules(def))
+		if (!def.HasPlayAttack() && !def.HasGrantModules())
 		{
 			GD.PushError($"{GetPath()}: skill has no PlayAttack and no grant modules ({def.ConfigId})");
 			return false;
@@ -224,6 +225,7 @@ public partial class CombatComponent : Node
 		var dt = (float)delta;
 		TickCooldowns(dt);
 		TickPlayAttacks(dt);
+		m_Effects.PhysicsTick(dt, this);
 	}
 
 	private void TickCooldowns(float dt)
@@ -256,7 +258,7 @@ public partial class CombatComponent : Node
 			var play = instance.PlayAttack;
 			if (play == null)
 			{
-				if (instance.Kind == AttackKind.Basic)
+				if (!InstanceStillAlive(instance))
 				{
 					m_Instances.RemoveAt(i);
 				}
@@ -279,7 +281,7 @@ public partial class CombatComponent : Node
 				}
 
 				instance.PlayAttack = null;
-				if (instance.Kind == AttackKind.Basic)
+				if (!InstanceStillAlive(instance))
 				{
 					m_Instances.RemoveAt(i);
 				}
@@ -382,6 +384,7 @@ public partial class CombatComponent : Node
 			}
 
 			CancelPlayAttack(instance);
+			m_Effects.RemoveBySourceRuntimeId(instance.RuntimeId, expire: false);
 			m_Instances.RemoveAt(i);
 		}
 	}
@@ -428,27 +431,150 @@ public partial class CombatComponent : Node
 			GD.PushError($"{GetPath()}: Job.{slotName} Kind is {def.Kind}, expected {expectedKind}");
 		}
 
-		if (expectedKind == AttackKind.Basic && HasGrantModules(def))
+		if (expectedKind == AttackKind.Basic && def.HasGrantModules())
 		{
 			GD.PushError($"{GetPath()}: Job.Attack must not grant duration effects");
 		}
 	}
 
-	private static bool HasGrantModules(SkillDefinition def)
+	public void ApplyModuleEffect(SkillInstance instance, GameplayEffect effect, bool toSelfOnly)
 	{
-		if (def?.Modules == null)
+		if (instance == null || effect == null || m_Actor == null)
 		{
-			return false;
+			return;
 		}
 
-		foreach (var module in def.Modules)
+		var targeting = toSelfOnly ? SkillTargeting.Self : instance.Definition.Targeting;
+		var radius = instance.Definition.AreaRadius;
+		if (targeting != SkillTargeting.Self && radius <= 0f)
 		{
-			if (module != null && module is not PlayAttackModule)
+			GD.PushError($"{GetPath()}: AreaRadius must be > 0 for targeting {targeting}");
+			return;
+		}
+
+		foreach (var target in CollectTargets(targeting, radius))
+		{
+			m_Effects.Apply(effect, target, instance.RuntimeId, instance.ConfigId);
+		}
+	}
+
+	public void HandleEffectTick(EffectInstance effect)
+	{
+		if (effect.Blueprint.TickDamage <= 0 || effect.Target?.Health == null)
+		{
+			return;
+		}
+
+		effect.Target.Health.TakeDamage(effect.Blueprint.TickDamage);
+	}
+
+	public void OnEffectExpired(EffectInstance effect)
+	{
+		_ = effect;
+	}
+
+	private List<Actor> CollectTargets(SkillTargeting targeting, float radius)
+	{
+		var result = new List<Actor>();
+		if (m_Actor == null)
+		{
+			return result;
+		}
+
+		if (targeting == SkillTargeting.Self)
+		{
+			result.Add(m_Actor);
+			return result;
+		}
+
+		var selfTeam = m_Hitbox != null ? m_Hitbox.Team : CombatTeam.Player;
+		if (!TryGetSelfLogicAabb(out var selfAabb))
+		{
+			return result;
+		}
+
+		if (targeting == SkillTargeting.AlliesInRadius || targeting == SkillTargeting.EveryoneInRadius)
+		{
+			result.Add(m_Actor);
+		}
+
+		foreach (var hurtbox in HurtboxRegistry.Snapshot())
+		{
+			if (hurtbox == null || !GodotObject.IsInstanceValid(hurtbox))
+			{
+				continue;
+			}
+
+			var target = hurtbox.GetOwnerActor();
+			if (target == null || target == m_Actor)
+			{
+				continue;
+			}
+
+			if (!hurtbox.TryGetWorldAabb(out var theirAabb))
+			{
+				continue;
+			}
+
+			var dx = theirAabb.Center.X - selfAabb.Center.X;
+			var depth = theirAabb.Center.Y - selfAabb.Center.Y;
+			if (dx * dx + depth * depth > radius * radius)
+			{
+				continue;
+			}
+
+			if (Mathf.Abs(selfAabb.Center.Z - theirAabb.Center.Z) > selfAabb.HalfExtents.Z + theirAabb.HalfExtents.Z)
+			{
+				continue;
+			}
+
+			var sameTeam = hurtbox.Team == selfTeam;
+			if (targeting == SkillTargeting.EnemiesInRadius && sameTeam)
+			{
+				continue;
+			}
+
+			if (targeting == SkillTargeting.AlliesInRadius && !sameTeam)
+			{
+				continue;
+			}
+
+			if (!result.Contains(target))
+			{
+				result.Add(target);
+			}
+		}
+
+		return result;
+	}
+
+	private bool InstanceStillAlive(SkillInstance instance)
+	{
+		if (instance.PlayAttack != null)
+		{
+			return true;
+		}
+
+		foreach (var effect in m_Effects.Effects)
+		{
+			if (effect.SourceRuntimeId == instance.RuntimeId)
 			{
 				return true;
 			}
 		}
 
+		return false;
+	}
+
+	private bool TryGetSelfLogicAabb(out LogicAabb aabb)
+	{
+		var hurtbox = GetNodeOrNull<HurtboxComponent>("../HurtboxComponent");
+		if (hurtbox != null && hurtbox.TryGetWorldAabb(out aabb))
+		{
+			return true;
+		}
+
+		aabb = default;
 		return false;
 	}
 
@@ -462,5 +588,6 @@ public partial class CombatComponent : Node
 
 		m_Hitbox?.DeactivateAll();
 		m_Strikes.Clear();
+		m_Effects.RemoveAll(expire: false);
 	}
 }

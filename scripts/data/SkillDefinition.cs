@@ -44,4 +44,22 @@ public partial class SkillDefinition : Resource
 
 		return false;
 	}
+
+	public bool HasGrantModules()
+	{
+		if (Modules == null)
+		{
+			return false;
+		}
+
+		foreach (var module in Modules)
+		{
+			if (module is ApplyEffectModule || module is GrantListenerModule)
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
 }
