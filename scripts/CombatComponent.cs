@@ -26,6 +26,8 @@ public partial class CombatComponent : Node
 	private readonly Dictionary<string, float> m_CooldownRemaining = new();
 	private readonly EffectHolder m_Effects = new();
 	private readonly List<ListenerBox> m_ListenerBoxes = new();
+	private int m_ComboNextIndex;
+	private float m_FollowUpRemaining;
 
 	private struct StrikeInfo
 	{
@@ -41,6 +43,14 @@ public partial class CombatComponent : Node
 	}
 
 	public bool IsAttacking => FindBasicPlayAttack() != null;
+
+	public bool IsPlayOccupied => FindAnyPlayAttack() != null;
+
+	public void BreakCombo()
+	{
+		m_ComboNextIndex = 0;
+		m_FollowUpRemaining = 0f;
+	}
 
 	public override void _Ready()
 	{
@@ -151,7 +161,7 @@ public partial class CombatComponent : Node
 			return false;
 		}
 
-		if (def.Kind == AttackKind.Basic && FindBasicPlayAttack() != null)
+		if (FindAnyPlayAttack() != null)
 		{
 			return false;
 		}
@@ -189,6 +199,11 @@ public partial class CombatComponent : Node
 			m_CooldownRemaining[def.ConfigId] = def.Cooldown;
 		}
 
+		if (def.Kind == AttackKind.Skill)
+		{
+			BreakCombo();
+		}
+
 		return true;
 	}
 
@@ -200,35 +215,68 @@ public partial class CombatComponent : Node
 			return;
 		}
 
-		var spec = GetFirstSpec(module);
-		if (spec == null)
+		var specs = module.Specs;
+		if (specs == null || CountNonNull(specs) == 0)
 		{
 			GD.PushError($"{GetPath()}: AttackSpec list is empty ({instance.ConfigId})");
+			if (instance.Kind == AttackKind.Basic)
+			{
+				BreakCombo();
+			}
+
 			return;
 		}
 
-		BeginPlayAttackFromSpec(instance, spec);
-	}
-
-	private static AttackSpec GetFirstSpec(PlayAttackModule module)
-	{
-		if (module.Specs == null)
+		var index = 0;
+		if (instance.Kind == AttackKind.Basic)
 		{
-			return null;
+			index = m_ComboNextIndex;
+			if (index < 0 || index >= specs.Count)
+			{
+				GD.PushError($"{GetPath()}: ComboNextIndex={index} out of range ({instance.ConfigId})");
+				index = 0;
+			}
+		}
+		else if (specs.Count > 1)
+		{
+			GD.PushError($"{GetPath()}: Skill PlayAttack uses Specs[0] only ({instance.ConfigId})");
 		}
 
-		foreach (var spec in module.Specs)
+		var spec = specs[index];
+		if (spec == null || spec.Hitboxes == null || spec.Hitboxes.Count == 0)
+		{
+			GD.PushError($"{GetPath()}: invalid AttackSpec at {index} ({instance.ConfigId})");
+			if (instance.Kind == AttackKind.Basic)
+			{
+				BreakCombo();
+			}
+
+			return;
+		}
+
+		if (instance.Kind == AttackKind.Basic)
+		{
+			m_FollowUpRemaining = 0f;
+		}
+
+		BeginPlayAttackFromSpec(instance, spec, index, isLast: index >= specs.Count - 1);
+	}
+
+	private static int CountNonNull(Godot.Collections.Array<AttackSpec> specs)
+	{
+		var count = 0;
+		foreach (var spec in specs)
 		{
 			if (spec != null)
 			{
-				return spec;
+				count += 1;
 			}
 		}
 
-		return null;
+		return count;
 	}
 
-	private void BeginPlayAttackFromSpec(SkillInstance instance, AttackSpec spec)
+	private void BeginPlayAttackFromSpec(SkillInstance instance, AttackSpec spec, int comboIndex, bool isLast)
 	{
 		if (instance == null || spec == null)
 		{
@@ -263,7 +311,9 @@ public partial class CombatComponent : Node
 			WindowStart = start,
 			WindowEnd = end,
 			BoxOpen = false,
-			BoxAttackId = 0
+			BoxAttackId = 0,
+			ComboIndex = comboIndex,
+			IsLastComboHit = isLast
 		};
 
 		if (start <= 0f)
@@ -277,8 +327,23 @@ public partial class CombatComponent : Node
 		var dt = (float)delta;
 		TickCooldowns(dt);
 		TickPlayAttacks(dt);
+		TickFollowUpWindow(dt);
 		TickListenerBoxes(dt);
 		m_Effects.PhysicsTick(dt, this);
+	}
+
+	private void TickFollowUpWindow(float dt)
+	{
+		if (m_FollowUpRemaining <= 0f)
+		{
+			return;
+		}
+
+		m_FollowUpRemaining -= dt;
+		if (m_FollowUpRemaining <= 0f)
+		{
+			BreakCombo();
+		}
 	}
 
 	private void TickCooldowns(float dt)
@@ -331,6 +396,19 @@ public partial class CombatComponent : Node
 					m_Hitbox.Deactivate(play.BoxAttackId);
 					m_Strikes.Remove(play.BoxAttackId);
 					play.BoxOpen = false;
+				}
+
+				if (instance.Kind == AttackKind.Basic)
+				{
+					if (play.IsLastComboHit || play.Spec == null || play.Spec.FollowUpWindow <= 0f)
+					{
+						BreakCombo();
+					}
+					else
+					{
+						m_ComboNextIndex = play.ComboIndex + 1;
+						m_FollowUpRemaining = play.Spec.FollowUpWindow;
+					}
 				}
 
 				instance.PlayAttack = null;
@@ -637,6 +715,19 @@ public partial class CombatComponent : Node
 		instance.PlayAttack = null;
 	}
 
+	private SkillInstance FindAnyPlayAttack()
+	{
+		foreach (var instance in m_Instances)
+		{
+			if (instance.PlayAttack != null)
+			{
+				return instance;
+			}
+		}
+
+		return null;
+	}
+
 	private SkillInstance FindBasicPlayAttack()
 	{
 		foreach (var instance in m_Instances)
@@ -816,5 +907,6 @@ public partial class CombatComponent : Node
 		m_Strikes.Clear();
 		m_ListenerBoxes.Clear();
 		m_Effects.RemoveAll(expire: false);
+		BreakCombo();
 	}
 }

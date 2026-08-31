@@ -8,6 +8,8 @@ public sealed class PlayAttackState
 	public float WindowEnd;
 	public bool BoxOpen;
 	public int BoxAttackId;
+	public int ComboIndex;
+	public bool IsLastComboHit;
 }
 
 public sealed class SkillInstance
