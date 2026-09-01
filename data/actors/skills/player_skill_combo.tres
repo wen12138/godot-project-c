@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="SkillDefinition" format=3 uid="uid://ci186jx0iceyi"]
+
+[ext_resource type="Script" uid="uid://bunw65kkbmxys" path="res://scripts/data/SkillDefinition.cs" id="1_def"]
+[ext_resource type="Script" uid="uid://ihoicuf6r0uw" path="res://scripts/data/SkillModule.cs" id="1_mod"]
+[ext_resource type="Script" uid="uid://rshcksbj33gl" path="res://scripts/data/PlayAttackModule.cs" id="2_play"]
+[ext_resource type="Script" uid="uid://bcefrd1075htg" path="res://scripts/data/AttackSpec.cs" id="3_spec_script"]
+[ext_resource type="Resource" uid="uid://bq7mvd3307prd" path="res://data/actors/attacks/player_skill_combo_spec_1.tres" id="4_spec1"]
+[ext_resource type="Resource" uid="uid://dw05y5gigy5a6" path="res://data/actors/attacks/player_skill_combo_spec_2.tres" id="5_spec2"]
+[ext_resource type="Resource" uid="uid://ceoonnq1e1756" path="res://data/actors/attacks/player_skill_combo_spec_3.tres" id="6_spec3"]
+
+[sub_resource type="Resource" id="Play_1"]
+script = ExtResource("2_play")
+Specs = Array[ExtResource("3_spec_script")]([ExtResource("4_spec1"), ExtResource("5_spec2"), ExtResource("6_spec3")])
+
+[resource]
+script = ExtResource("1_def")
+ConfigId = "skill.player_default.skill_combo"
+Kind = 1
+Cooldown = 10.0
+Modules = Array[ExtResource("1_mod")]([SubResource("Play_1")])

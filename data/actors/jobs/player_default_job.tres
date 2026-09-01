@@ -3,9 +3,9 @@
 [ext_resource type="Script" uid="uid://dv5i1ilbddqxv" path="res://scripts/data/JobDefinition.cs" id="1_job"]
 [ext_resource type="PackedScene" path="res://prefabs/locomotion/ground_locomotion.tscn" id="2_loco"]
 [ext_resource type="Resource" path="res://data/actors/movement/player_default_move.tres" id="3_move"]
-[ext_resource type="Resource" path="res://data/actors/skills/player_default_attack.tres" id="4_atk"]
-[ext_resource type="Resource" path="res://data/actors/skills/player_extra_blow.tres" id="5_skill"]
-[ext_resource type="Resource" path="res://data/actors/skills/player_charge_burst.tres" id="6_ult"]
+[ext_resource type="Resource" uid="uid://ck00b1go2gvtp" path="res://data/actors/skills/player_default_attack.tres" id="4_atk"]
+[ext_resource type="Resource" path="res://data/actors/skills/player_skill_combo.tres" id="5_skill"]
+[ext_resource type="Resource" uid="uid://baltjtj77eld0" path="res://data/actors/skills/player_charge_burst.tres" id="6_ult"]
 
 [resource]
 script = ExtResource("1_job")

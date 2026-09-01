@@ -28,6 +28,13 @@ public partial class CombatComponent : Node
 	private readonly List<ListenerBox> m_ListenerBoxes = new();
 	private int m_ComboNextIndex;
 	private float m_FollowUpRemaining;
+	private readonly Dictionary<string, SkillComboState> m_SkillCombos = new();
+
+	private struct SkillComboState
+	{
+		public int NextIndex;
+		public float FollowUpRemaining;
+	}
 
 	private struct StrikeInfo
 	{
@@ -50,6 +57,100 @@ public partial class CombatComponent : Node
 	{
 		m_ComboNextIndex = 0;
 		m_FollowUpRemaining = 0f;
+	}
+
+	public void ClearSkillCombo(string configId)
+	{
+		if (string.IsNullOrEmpty(configId))
+		{
+			return;
+		}
+
+		m_SkillCombos.Remove(configId);
+	}
+
+	private bool IsSkillFollowUpOpen(string configId)
+	{
+		return !string.IsNullOrEmpty(configId)
+			&& m_SkillCombos.TryGetValue(configId, out var state)
+			&& state.FollowUpRemaining > 0f;
+	}
+
+	private static PlayAttackModule FindPlayAttackModule(SkillDefinition def)
+	{
+		if (def?.Modules == null)
+		{
+			return null;
+		}
+
+		foreach (var module in def.Modules)
+		{
+			if (module is PlayAttackModule play)
+			{
+				return play;
+			}
+		}
+
+		return null;
+	}
+
+	private int ResolveComboIndex(SkillDefinition def, int specCount)
+	{
+		var index = 0;
+		if (def.Kind == AttackKind.Basic)
+		{
+			index = m_ComboNextIndex;
+		}
+		else if (IsSkillFollowUpOpen(def.ConfigId))
+		{
+			index = m_SkillCombos[def.ConfigId].NextIndex;
+		}
+
+		if (index < 0 || index >= specCount)
+		{
+			GD.PushError($"{GetPath()}: combo index {index} out of range ({def.ConfigId})");
+			index = 0;
+		}
+
+		return index;
+	}
+
+	private bool TryResolvePlaySpec(SkillDefinition def, out AttackSpec spec, out int index)
+	{
+		spec = null;
+		index = 0;
+		if (def == null || !def.HasPlayAttack())
+		{
+			return true;
+		}
+
+		var module = FindPlayAttackModule(def);
+		var specs = module?.Specs;
+		if (specs == null || CountNonNull(specs) == 0)
+		{
+			GD.PushError($"{GetPath()}: AttackSpec list is empty ({def.ConfigId})");
+			if (def.Kind == AttackKind.Basic)
+			{
+				BreakCombo();
+			}
+
+			return false;
+		}
+
+		index = ResolveComboIndex(def, specs.Count);
+		spec = specs[index];
+		if (spec == null || spec.Hitboxes == null || spec.Hitboxes.Count == 0)
+		{
+			GD.PushError($"{GetPath()}: invalid AttackSpec at {index} ({def.ConfigId})");
+			if (def.Kind == AttackKind.Basic)
+			{
+				BreakCombo();
+			}
+
+			return false;
+		}
+
+		return true;
 	}
 
 	public override void _Ready()
@@ -166,7 +267,13 @@ public partial class CombatComponent : Node
 			return false;
 		}
 
-		if (m_CooldownRemaining.TryGetValue(def.ConfigId, out var cdLeft) && cdLeft > 0f)
+		if (def.HasPlayAttack() && !TryResolvePlaySpec(def, out _, out _))
+		{
+			return false;
+		}
+
+		var followUp = def.Kind == AttackKind.Skill && IsSkillFollowUpOpen(def.ConfigId);
+		if (!followUp && m_CooldownRemaining.TryGetValue(def.ConfigId, out var cdLeft) && cdLeft > 0f)
 		{
 			return false;
 		}
@@ -194,7 +301,7 @@ public partial class CombatComponent : Node
 			}
 		}
 
-		if (def.Cooldown > 0f)
+		if (!followUp && def.Cooldown > 0f)
 		{
 			m_CooldownRemaining[def.ConfigId] = def.Cooldown;
 		}
@@ -215,6 +322,12 @@ public partial class CombatComponent : Node
 			return;
 		}
 
+		if (instance.Definition == null)
+		{
+			GD.PushError($"{GetPath()}: BeginPlayAttack missing SkillDefinition ({instance.ConfigId})");
+			return;
+		}
+
 		var specs = module.Specs;
 		if (specs == null || CountNonNull(specs) == 0)
 		{
@@ -227,21 +340,7 @@ public partial class CombatComponent : Node
 			return;
 		}
 
-		var index = 0;
-		if (instance.Kind == AttackKind.Basic)
-		{
-			index = m_ComboNextIndex;
-			if (index < 0 || index >= specs.Count)
-			{
-				GD.PushError($"{GetPath()}: ComboNextIndex={index} out of range ({instance.ConfigId})");
-				index = 0;
-			}
-		}
-		else if (specs.Count > 1)
-		{
-			GD.PushError($"{GetPath()}: Skill PlayAttack uses Specs[0] only ({instance.ConfigId})");
-		}
-
+		var index = ResolveComboIndex(instance.Definition, specs.Count);
 		var spec = specs[index];
 		if (spec == null || spec.Hitboxes == null || spec.Hitboxes.Count == 0)
 		{
@@ -257,6 +356,12 @@ public partial class CombatComponent : Node
 		if (instance.Kind == AttackKind.Basic)
 		{
 			m_FollowUpRemaining = 0f;
+		}
+		else if (instance.Kind == AttackKind.Skill
+			&& m_SkillCombos.TryGetValue(instance.ConfigId, out var skillCombo))
+		{
+			skillCombo.FollowUpRemaining = 0f;
+			m_SkillCombos[instance.ConfigId] = skillCombo;
 		}
 
 		BeginPlayAttackFromSpec(instance, spec, index, isLast: index >= specs.Count - 1);
@@ -334,15 +439,38 @@ public partial class CombatComponent : Node
 
 	private void TickFollowUpWindow(float dt)
 	{
-		if (m_FollowUpRemaining <= 0f)
+		if (m_FollowUpRemaining > 0f)
+		{
+			m_FollowUpRemaining -= dt;
+			if (m_FollowUpRemaining <= 0f)
+			{
+				BreakCombo();
+			}
+		}
+
+		if (m_SkillCombos.Count == 0)
 		{
 			return;
 		}
 
-		m_FollowUpRemaining -= dt;
-		if (m_FollowUpRemaining <= 0f)
+		var keys = new List<string>(m_SkillCombos.Keys);
+		foreach (var key in keys)
 		{
-			BreakCombo();
+			var state = m_SkillCombos[key];
+			if (state.FollowUpRemaining <= 0f)
+			{
+				continue;
+			}
+
+			state.FollowUpRemaining -= dt;
+			if (state.FollowUpRemaining <= 0f)
+			{
+				m_SkillCombos.Remove(key);
+			}
+			else
+			{
+				m_SkillCombos[key] = state;
+			}
 		}
 	}
 
@@ -408,6 +536,21 @@ public partial class CombatComponent : Node
 					{
 						m_ComboNextIndex = play.ComboIndex + 1;
 						m_FollowUpRemaining = play.Spec.FollowUpWindow;
+					}
+				}
+				else if (instance.Kind == AttackKind.Skill)
+				{
+					if (play.IsLastComboHit || play.Spec == null || play.Spec.FollowUpWindow <= 0f)
+					{
+						ClearSkillCombo(instance.ConfigId);
+					}
+					else
+					{
+						m_SkillCombos[instance.ConfigId] = new SkillComboState
+						{
+							NextIndex = play.ComboIndex + 1,
+							FollowUpRemaining = play.Spec.FollowUpWindow
+						};
 					}
 				}
 
@@ -908,5 +1051,7 @@ public partial class CombatComponent : Node
 		m_ListenerBoxes.Clear();
 		m_Effects.RemoveAll(expire: false);
 		BreakCombo();
+		m_SkillCombos.Clear();
+		m_CooldownRemaining.Clear();
 	}
 }
