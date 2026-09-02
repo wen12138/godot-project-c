@@ -5,7 +5,7 @@
 [ext_resource type="Resource" path="res://data/actors/movement/player_default_move.tres" id="3_move"]
 [ext_resource type="Resource" uid="uid://ck00b1go2gvtp" path="res://data/actors/skills/player_default_attack.tres" id="4_atk"]
 [ext_resource type="Resource" path="res://data/actors/skills/player_skill_burst.tres" id="5_skill"]
-[ext_resource type="Resource" uid="uid://baltjtj77eld0" path="res://data/actors/skills/player_charge_burst.tres" id="6_ult"]
+[ext_resource type="Resource" path="res://data/actors/skills/player_skill_pulse.tres" id="6_ult"]
 
 [resource]
 script = ExtResource("1_job")

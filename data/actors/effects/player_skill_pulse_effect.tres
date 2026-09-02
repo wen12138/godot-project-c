@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="GameplayEffect" load_steps=4 format=3]
+
+[ext_resource type="Script" uid="uid://c85hpo5maoenq" path="res://scripts/data/GameplayEffect.cs" id="1_fx"]
+[ext_resource type="Script" uid="uid://4ay68nn16gn1" path="res://scripts/data/HitboxEntry.cs" id="2_entry"]
+
+[sub_resource type="Resource" id="Extra_1"]
+script = ExtResource("2_entry")
+Offset = Vector3(48, 0, 36)
+Size = Vector3(72, 28, 72)
+
+[resource]
+script = ExtResource("1_fx")
+Duration = 20.1
+Period = 1.0
+TickDamage = 0
+SubscribeBasic = false
+SubscribeSkill = false
+ExtraHitbox = SubResource("Extra_1")
+ExtraHitboxDuration = 0.1
+ChargeMax = 0
+BurstDamage = 0
+BurstRadius = 80.0

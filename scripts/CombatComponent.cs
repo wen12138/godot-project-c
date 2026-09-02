@@ -442,6 +442,92 @@ public partial class CombatComponent : Node
 		};
 
 		TryOpenPlayBox(instance, instance.PlayAttack, previous: -1f);
+		TryApplyCuedEffects(instance, previous: -1f, elapsed: 0f);
+	}
+
+	private static bool TryResolveApplyCue(ApplyEffectModule module, AttackSpec spec, Node owner, string configId, out float at)
+	{
+		at = 0f;
+		if (module == null || spec == null)
+		{
+			return false;
+		}
+
+		switch (module.Cue)
+		{
+			case ApplyEffectCue.PlayStartupStart:
+				at = 0f;
+				return true;
+			case ApplyEffectCue.PlayActiveStart:
+				at = Mathf.Max(0f, spec.Startup);
+				return true;
+			case ApplyEffectCue.PlayRecoveryStart:
+				at = Mathf.Max(0f, spec.Startup) + Mathf.Max(0f, spec.Active);
+				return true;
+			case ApplyEffectCue.PlayComplete:
+				at = spec.TotalDuration;
+				return true;
+			case ApplyEffectCue.PlayElapsed:
+				if (module.ApplyAt < 0f)
+				{
+					GD.PushError($"{owner.GetPath()}: PlayElapsed ApplyAt < 0 ({configId})");
+					return false;
+				}
+
+				at = Mathf.Min(module.ApplyAt, spec.TotalDuration);
+				return true;
+			default:
+				GD.PushError($"{owner.GetPath()}: unknown ApplyEffectCue {module.Cue} ({configId})");
+				return false;
+		}
+	}
+
+	private void TryApplyCuedEffects(SkillInstance instance, float previous, float elapsed)
+	{
+		var play = instance?.PlayAttack;
+		if (play?.Spec == null || instance.Definition?.Modules == null)
+		{
+			return;
+		}
+
+		var modules = instance.Definition.Modules;
+		for (var i = 0; i < modules.Count; i++)
+		{
+			if (modules[i] is not ApplyEffectModule apply)
+			{
+				continue;
+			}
+
+			if (play.AppliedEffectModules.Contains(i))
+			{
+				continue;
+			}
+
+			if (!TryResolveApplyCue(apply, play.Spec, this, instance.ConfigId, out var at))
+			{
+				continue;
+			}
+
+			if (previous < at && elapsed >= at)
+			{
+				WarnPulseTargeting(instance, apply.Effect);
+				ApplyModuleEffect(instance, apply.Effect, toSelfOnly: false);
+				play.AppliedEffectModules.Add(i);
+			}
+		}
+	}
+
+	private void WarnPulseTargeting(SkillInstance instance, GameplayEffect effect)
+	{
+		if (effect?.ExtraHitbox == null || instance?.Definition == null)
+		{
+			return;
+		}
+
+		if (instance.Definition.Targeting != SkillTargeting.Self)
+		{
+			GD.PushError($"{GetPath()}: ExtraHitbox pulse requires Targeting=Self ({instance.ConfigId})");
+		}
 	}
 
 	public void PhysicsTick(double delta)
@@ -533,6 +619,7 @@ public partial class CombatComponent : Node
 			play.Elapsed += dt;
 			TryOpenPlayBox(instance, play, previous);
 			TryClosePlayBox(instance, play, previous);
+			TryApplyCuedEffects(instance, previous, play.Elapsed);
 
 			if (play.Elapsed >= play.Total)
 			{
@@ -971,12 +1058,20 @@ public partial class CombatComponent : Node
 
 	public void HandleEffectTick(EffectInstance effect)
 	{
-		if (effect.Blueprint.TickDamage <= 0 || effect.Target?.Health == null)
+		if (effect?.Blueprint == null)
 		{
 			return;
 		}
 
-		effect.Target.Health.TakeDamage(effect.Blueprint.TickDamage);
+		if (effect.Blueprint.TickDamage > 0 && effect.Target?.Health != null)
+		{
+			effect.Target.Health.TakeDamage(effect.Blueprint.TickDamage);
+		}
+
+		if (effect.Blueprint.ExtraHitbox != null && effect.Target == m_Actor)
+		{
+			OpenListenerHitbox(effect);
+		}
 	}
 
 	private List<Actor> CollectTargets(SkillTargeting targeting, float radius)

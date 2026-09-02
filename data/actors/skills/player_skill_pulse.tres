@@ -1,0 +1,30 @@
+[gd_resource type="Resource" script_class="SkillDefinition" load_steps=10 format=3]
+
+[ext_resource type="Script" uid="uid://bunw65kkbmxys" path="res://scripts/data/SkillDefinition.cs" id="1_def"]
+[ext_resource type="Script" uid="uid://ihoicuf6r0uw" path="res://scripts/data/SkillModule.cs" id="1_mod"]
+[ext_resource type="Script" uid="uid://rshcksbj33gl" path="res://scripts/data/PlayAttackModule.cs" id="2_play"]
+[ext_resource type="Script" uid="uid://bcefrd1075htg" path="res://scripts/data/AttackSpec.cs" id="3_spec_script"]
+[ext_resource type="Resource" path="res://data/actors/attacks/player_skill_pulse_open_spec.tres" id="4_spec"]
+[ext_resource type="Script" uid="uid://fhbkaptlaij5" path="res://scripts/data/ApplyEffectModule.cs" id="5_apply"]
+[ext_resource type="Resource" path="res://data/actors/effects/player_skill_pulse_effect.tres" id="6_fx"]
+
+[sub_resource type="Resource" id="Play_1"]
+script = ExtResource("2_play")
+Specs = Array[ExtResource("3_spec_script")]([ExtResource("4_spec")])
+
+[sub_resource type="Resource" id="Apply_1"]
+script = ExtResource("5_apply")
+Effect = ExtResource("6_fx")
+Cue = 1
+ApplyAt = -1.0
+
+[resource]
+script = ExtResource("1_def")
+ConfigId = "skill.player_default.pulse"
+Kind = 1
+Cost = 0
+Cooldown = 8.0
+Stacking = 0
+Targeting = 0
+AreaRadius = 0.0
+Modules = Array[ExtResource("1_mod")]([SubResource("Play_1"), SubResource("Apply_1")])

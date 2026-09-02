@@ -17,6 +17,7 @@ public sealed class PlayAttackState
 	public int ComboIndex;
 	public bool IsLastComboHit;
 	public List<PlayBoxState> Boxes = new();
+	public HashSet<int> AppliedEffectModules = new();
 }
 
 public sealed class SkillInstance
