@@ -395,36 +395,53 @@ public partial class CombatComponent : Node
 			return;
 		}
 
-		if (spec.Hitboxes.Count > 1)
+		var total = spec.TotalDuration;
+		var boxes = new List<PlayBoxState>();
+		foreach (var entry in spec.Hitboxes)
 		{
-			GD.PushError($"{GetPath()}: AttackSpec has {spec.Hitboxes.Count} hitboxes; using the first ({instance.ConfigId})");
+			if (!spec.TryResolveWindow(entry, out var start, out var end))
+			{
+				GD.PushError($"{GetPath()}: invalid hitbox window ({instance.ConfigId})");
+				continue;
+			}
+
+			if (start >= total)
+			{
+				GD.PushError($"{GetPath()}: hitbox starts at {start} after attack end {total} ({instance.ConfigId})");
+				continue;
+			}
+
+			if (end > total)
+			{
+				GD.PushError($"{GetPath()}: hitbox end {end} exceeds attack duration {total} ({instance.ConfigId})");
+				end = total;
+			}
+
+			boxes.Add(new PlayBoxState
+			{
+				Entry = entry,
+				WindowStart = start,
+				WindowEnd = end
+			});
 		}
 
-		var entry = spec.Hitboxes[0];
-		if (!spec.TryResolveWindow(entry, out var start, out var end))
+		if (boxes.Count == 0)
 		{
-			GD.PushError($"{GetPath()}: invalid hitbox window ({instance.ConfigId})");
+			GD.PushError($"{GetPath()}: AttackSpec has no valid hitbox windows ({instance.ConfigId})");
 			return;
 		}
 
 		instance.PlayAttack = new PlayAttackState
 		{
 			Spec = spec,
-			Entry = entry,
 			Elapsed = 0f,
-			Total = spec.TotalDuration,
-			WindowStart = start,
-			WindowEnd = end,
-			BoxOpen = false,
-			BoxAttackId = 0,
+			Total = total,
 			ComboIndex = comboIndex,
-			IsLastComboHit = isLast
+			IsLastComboHit = isLast,
+			Boxes = boxes
 		};
 
-		if (start <= 0f)
-		{
-			TryOpenPlayBox(instance, instance.PlayAttack, previous: -1f);
-		}
+		TryOpenPlayBox(instance, instance.PlayAttack, previous: -1f);
 	}
 
 	public void PhysicsTick(double delta)
@@ -519,12 +536,7 @@ public partial class CombatComponent : Node
 
 			if (play.Elapsed >= play.Total)
 			{
-				if (play.BoxOpen)
-				{
-					m_Hitbox.Deactivate(play.BoxAttackId);
-					m_Strikes.Remove(play.BoxAttackId);
-					play.BoxOpen = false;
-				}
+				CloseAllPlayBoxes(play);
 
 				if (instance.Kind == AttackKind.Basic)
 				{
@@ -565,41 +577,80 @@ public partial class CombatComponent : Node
 
 	private void TryOpenPlayBox(SkillInstance instance, PlayAttackState play, float previous)
 	{
-		if (play.BoxOpen)
+		if (play.Boxes == null)
 		{
 			return;
 		}
 
-		if (previous < play.WindowStart && play.Elapsed >= play.WindowStart)
+		foreach (var box in play.Boxes)
 		{
-			var attackId = m_NextAttackId;
-			m_NextAttackId += 1;
-			play.BoxAttackId = attackId;
-			play.BoxOpen = true;
-			m_Strikes[attackId] = new StrikeInfo
+			if (box.BoxOpen || box.Entry == null)
 			{
-				RuntimeId = instance.RuntimeId,
-				Kind = instance.Kind,
-				FromListener = false
-			};
-			m_Hitbox.Activate(attackId, play.Entry.Offset, play.Entry.Size);
-			EmitAttackStarted(instance.Kind, attackId, instance.RuntimeId);
+				continue;
+			}
+
+			if (previous < box.WindowStart && play.Elapsed >= box.WindowStart)
+			{
+				var attackId = m_NextAttackId;
+				m_NextAttackId += 1;
+				box.BoxAttackId = attackId;
+				box.BoxOpen = true;
+				m_Strikes[attackId] = new StrikeInfo
+				{
+					RuntimeId = instance.RuntimeId,
+					Kind = instance.Kind,
+					FromListener = false
+				};
+				m_Hitbox.Activate(attackId, box.Entry.Offset, box.Entry.Size);
+				EmitAttackStarted(instance.Kind, attackId, instance.RuntimeId);
+			}
 		}
 	}
 
 	private void TryClosePlayBox(SkillInstance instance, PlayAttackState play, float previous)
 	{
 		_ = instance;
-		if (!play.BoxOpen)
+		if (play.Boxes == null)
 		{
 			return;
 		}
 
-		if (previous < play.WindowEnd && play.Elapsed >= play.WindowEnd)
+		foreach (var box in play.Boxes)
 		{
-			m_Hitbox.Deactivate(play.BoxAttackId);
-			m_Strikes.Remove(play.BoxAttackId);
-			play.BoxOpen = false;
+			if (!box.BoxOpen)
+			{
+				continue;
+			}
+
+			if (previous < box.WindowEnd && play.Elapsed >= box.WindowEnd)
+			{
+				ClosePlayBox(box);
+			}
+		}
+	}
+
+	private void ClosePlayBox(PlayBoxState box)
+	{
+		if (box == null || !box.BoxOpen)
+		{
+			return;
+		}
+
+		m_Hitbox.Deactivate(box.BoxAttackId);
+		m_Strikes.Remove(box.BoxAttackId);
+		box.BoxOpen = false;
+	}
+
+	private void CloseAllPlayBoxes(PlayAttackState play)
+	{
+		if (play?.Boxes == null)
+		{
+			return;
+		}
+
+		foreach (var box in play.Boxes)
+		{
+			ClosePlayBox(box);
 		}
 	}
 
@@ -849,12 +900,7 @@ public partial class CombatComponent : Node
 			return;
 		}
 
-		if (play.BoxOpen)
-		{
-			m_Hitbox.Deactivate(play.BoxAttackId);
-			m_Strikes.Remove(play.BoxAttackId);
-		}
-
+		CloseAllPlayBoxes(play);
 		instance.PlayAttack = null;
 	}
 
