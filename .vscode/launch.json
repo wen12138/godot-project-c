@@ -1,19 +1,25 @@
 {
     "version": "0.2.0",
     "configurations": [
-      {
-        "name": "Play",
-        "type": "coreclr",
-        "request": "attach",
-        "preLaunchTask": "build",
-        "processPath": "d:\\Godot_v4.6.2-stable_mono_win64\\Godot_v4.6.2-stable_mono_win64.exe",
-        "cwd": "${workspaceFolder}"
-      },
-      {
-        "name": "Attach",
-        "type": "coreclr",
-        "request": "attach",
-        "processId": "${command:pickProcess}"
-      }
+        {
+            "name": "Play",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "d:\\Godot_v4.6.2-stable_mono_win64\\Godot_v4.6.2-stable_mono_win64.exe",
+            "args": [
+                "--path",
+                "${workspaceFolder}"
+            ],
+            "cwd": "${workspaceFolder}",
+            "stopAtEntry": false,
+            "console": "internalConsole"
+        },
+        {
+            "name": "Attach",
+            "type": "coreclr",
+            "request": "attach",
+            "processId": "${command:pickProcess}"
+        }
     ]
-  }
+}
