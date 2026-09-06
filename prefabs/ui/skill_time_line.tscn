@@ -1,0 +1,39 @@
+[gd_scene format=3 uid="uid://ccwqma0p17c0h"]
+
+[ext_resource type="Script" uid="uid://dahenoyw2ps80" path="res://scripts/ui/UI_SkillTimeLine.cs" id="1_script"]
+[ext_resource type="PackedScene" uid="uid://c4dkhye24a4a8" path="res://prefabs/ui/entry_time_rect.tscn" id="2_1ejv6"]
+
+[node name="SkillTimeLine" type="VBoxContainer" unique_id=1843956164]
+custom_minimum_size = Vector2(205, 40)
+size_flags_horizontal = 4
+theme_override_constants/separation = 0
+script = ExtResource("1_script")
+EntryTimeRect = ExtResource("2_1ejv6")
+
+[node name="SkillName" type="Label" parent="." unique_id=546870125]
+layout_mode = 2
+text = "普通攻击"
+
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=1550811978]
+custom_minimum_size = Vector2(0, 14)
+layout_mode = 2
+theme_override_constants/margin_right = 5
+
+[node name="TimeLineBox" type="HBoxContainer" parent="MarginContainer" unique_id=183191062]
+custom_minimum_size = Vector2(200, 10)
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_constants/separation = 0
+
+[node name="MarkerBox" type="HBoxContainer" parent="MarginContainer" unique_id=849759692]
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="TimeFillRect" type="ColorRect" parent="MarginContainer/MarkerBox" unique_id=469491954]
+layout_mode = 2
+
+[node name="MarkerRect" type="ColorRect" parent="MarginContainer/MarkerBox" unique_id=1313257863]
+custom_minimum_size = Vector2(4, 0)
+layout_mode = 2
+color = Color(0.050980367, 0.99607843, 0.24295339, 1)

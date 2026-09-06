@@ -6,6 +6,8 @@
 [ext_resource type="PackedScene" uid="uid://d0c82o02o7ci3" path="res://prefabs/Player.tscn" id="4_1bvp3"]
 [ext_resource type="Script" uid="uid://b2b5f26b21kjl" path="res://scripts/MapOrigin.cs" id="5_mapori"]
 [ext_resource type="PackedScene" uid="uid://jx6fhh0sbfcy" path="res://prefabs/Enemy.tscn" id="6_enemy"]
+[ext_resource type="PackedScene" uid="uid://ccwqma0p17c0h" path="res://prefabs/ui/skill_time_line.tscn" id="7_5vw27"]
+[ext_resource type="Script" uid="uid://gm6alifms718" path="res://scripts/ui/UI_SkillDebug.cs" id="7_kek77"]
 
 [node name="Main" type="Node2D" unique_id=157214660]
 
@@ -36,3 +38,35 @@ position = Vector2(640, 440)
 
 [node name="Enemy" parent="Actors" unique_id=276056797 instance=ExtResource("6_enemy")]
 position = Vector2(720, 440)
+
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1768314625]
+
+[node name="Debug" type="Node" parent="CanvasLayer" unique_id=632709954]
+
+[node name="SkillDebug" type="Control" parent="CanvasLayer/Debug" unique_id=156481050]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("7_kek77")
+TimeLinePrefab = ExtResource("7_5vw27")
+PlayerPath = NodePath("../../../Actors/Player")
+
+[node name="TimeLineVBox" type="VBoxContainer" parent="CanvasLayer/Debug/SkillDebug" unique_id=1855858713]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -102.5
+offset_top = -307.575
+offset_right = 102.5
+offset_bottom = -132.56824
+grow_horizontal = 2
+grow_vertical = 0
+pivot_offset_ratio = Vector2(0.5, 0)
+theme_override_constants/separation = 5
+alignment = 2

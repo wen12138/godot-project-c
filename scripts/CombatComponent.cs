@@ -28,12 +28,14 @@ public partial class CombatComponent : Node
 	private readonly List<ListenerBox> m_ListenerBoxes = new();
 	private int m_ComboNextIndex;
 	private float m_FollowUpRemaining;
+	private uint m_BasicFollowUpRuntimeId;
 	private readonly Dictionary<string, SkillComboState> m_SkillCombos = new();
 
 	private struct SkillComboState
 	{
 		public int NextIndex;
 		public float FollowUpRemaining;
+		public uint SourceRuntimeId;
 	}
 
 	private struct StrikeInfo
@@ -57,6 +59,30 @@ public partial class CombatComponent : Node
 	{
 		m_ComboNextIndex = 0;
 		m_FollowUpRemaining = 0f;
+		m_BasicFollowUpRuntimeId = 0;
+	}
+
+	public float GetFollowUpRemaining(SkillInstance instance)
+	{
+		if (instance == null)
+		{
+			return 0f;
+		}
+
+		if (instance.Kind == AttackKind.Basic
+			&& instance.RuntimeId == m_BasicFollowUpRuntimeId)
+		{
+			return Mathf.Max(0f, m_FollowUpRemaining);
+		}
+
+		if (instance.Kind == AttackKind.Skill
+			&& m_SkillCombos.TryGetValue(instance.ConfigId, out var state)
+			&& state.SourceRuntimeId == instance.RuntimeId)
+		{
+			return Mathf.Max(0f, state.FollowUpRemaining);
+		}
+
+		return 0f;
 	}
 
 	public void ClearSkillCombo(string configId)
@@ -356,6 +382,7 @@ public partial class CombatComponent : Node
 		if (instance.Kind == AttackKind.Basic)
 		{
 			m_FollowUpRemaining = 0f;
+			m_BasicFollowUpRuntimeId = 0;
 		}
 		else if (instance.Kind == AttackKind.Skill
 			&& m_SkillCombos.TryGetValue(instance.ConfigId, out var skillCombo))
@@ -625,6 +652,7 @@ public partial class CombatComponent : Node
 			{
 				CloseAllPlayBoxes(play);
 
+				var openedFollowUp = false;
 				if (instance.Kind == AttackKind.Basic)
 				{
 					if (play.IsLastComboHit || play.Spec == null || play.Spec.FollowUpWindow <= 0f)
@@ -635,6 +663,8 @@ public partial class CombatComponent : Node
 					{
 						m_ComboNextIndex = play.ComboIndex + 1;
 						m_FollowUpRemaining = play.Spec.FollowUpWindow;
+						m_BasicFollowUpRuntimeId = instance.RuntimeId;
+						openedFollowUp = true;
 					}
 				}
 				else if (instance.Kind == AttackKind.Skill)
@@ -648,11 +678,14 @@ public partial class CombatComponent : Node
 						m_SkillCombos[instance.ConfigId] = new SkillComboState
 						{
 							NextIndex = play.ComboIndex + 1,
-							FollowUpRemaining = play.Spec.FollowUpWindow
+							FollowUpRemaining = play.Spec.FollowUpWindow,
+							SourceRuntimeId = instance.RuntimeId
 						};
+						openedFollowUp = true;
 					}
 				}
 
+				instance.LastPlayAttack = openedFollowUp ? play : null;
 				instance.PlayAttack = null;
 				if (!InstanceStillAlive(instance))
 				{
@@ -1156,6 +1189,11 @@ public partial class CombatComponent : Node
 			return true;
 		}
 
+		if (GetFollowUpRemaining(instance) > 0f)
+		{
+			return true;
+		}
+
 		foreach (var effect in m_Effects.Effects)
 		{
 			if (effect.SourceRuntimeId == instance.RuntimeId)
@@ -1194,5 +1232,15 @@ public partial class CombatComponent : Node
 		BreakCombo();
 		m_SkillCombos.Clear();
 		m_CooldownRemaining.Clear();
+	}
+
+	public List<SkillInstance> GetSkillInstances()
+	{
+		return m_Instances;
+	}
+
+	public IReadOnlyList<EffectInstance> GetEffects()
+	{
+		return m_Effects.Effects;
 	}
 }

@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://c4dkhye24a4a8"]
+
+[node name="EntryTimeRect" type="ColorRect" unique_id=502631189]
+custom_minimum_size = Vector2(0, 10)
+mouse_filter = 2
+size_flags_vertical = 1

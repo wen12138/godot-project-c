@@ -27,4 +27,5 @@ public sealed class SkillInstance
 	public AttackKind Kind;
 	public SkillDefinition Definition;
 	public PlayAttackState PlayAttack;
+	public PlayAttackState LastPlayAttack;
 }
